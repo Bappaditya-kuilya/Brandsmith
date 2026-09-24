@@ -158,7 +158,8 @@ public class SessionService {
     private Map<String, Object> fetchOwned(UUID id, String token) {
         List<Map<String, Object>> rows;
         try {
-            rows = jdbc.queryForList("SELECT * FROM session WHERE id = ?", id);
+            rows = jdbc.queryForList(
+                    "SELECT * FROM session WHERE id = ? AND expires_at IS NOT NULL AND expires_at > now()", id);
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(NOT_FOUND, "Session not found");
         }

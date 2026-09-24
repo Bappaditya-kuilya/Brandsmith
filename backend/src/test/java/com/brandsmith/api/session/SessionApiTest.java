@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockCookie;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -32,6 +33,9 @@ class SessionApiTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Test
     void createRejectsIdeaUnderTenChars() throws Exception {
@@ -89,6 +93,28 @@ class SessionApiTest {
 
         mockMvc.perform(delete("/api/sessions/" + id).cookie(owner))
                 .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/sessions/" + id).cookie(owner))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void ownerGetReturnsNotFoundOnceSessionExpired() throws Exception {
+        MvcResult created = mockMvc.perform(post("/api/sessions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"idea\":\"" + VALID_IDEA + "\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String id = created.getResponse().getContentAsString().replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+        MockCookie owner = new MockCookie("owner_token",
+                created.getResponse().getCookie("owner_token").getValue());
+
+        mockMvc.perform(get("/api/sessions/" + id).cookie(owner))
+                .andExpect(status().isOk());
+
+        jdbc.update("UPDATE session SET expires_at = now() - interval '1 day' WHERE id = ?",
+                java.util.UUID.fromString(id));
 
         mockMvc.perform(get("/api/sessions/" + id).cookie(owner))
                 .andExpect(status().isNotFound());
