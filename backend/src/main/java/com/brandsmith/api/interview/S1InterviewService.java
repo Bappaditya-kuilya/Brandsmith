@@ -24,9 +24,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 
 @Service
 public class S1InterviewService {
+
+    public static final String STAGE = "S1";
+    public static final String LOCKED_MESSAGE =
+            "Interview is locked. Unlock it before answering.";
 
     private static final Logger log = LoggerFactory.getLogger(S1InterviewService.class);
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -61,6 +66,9 @@ public class S1InterviewService {
 
     public InterviewResponse submit(UUID id, String token, AnswerRequest request) {
         SessionService.BriefSnapshot snapshot = sessions.loadBrief(id, token);
+        if (sessions.stageLocked(id, STAGE)) {
+            throw new ResponseStatusException(CONFLICT, LOCKED_MESSAGE);
+        }
         BriefState brief = mapper.convertValue(snapshot.brief(), BriefState.class);
         brief.ensureFields();
 
@@ -95,7 +103,7 @@ public class S1InterviewService {
         }
         brief.startQuestion(fieldId);
         sessions.saveBrief(id, toMap(brief), generated.costUsd());
-        StageRunRecorder.Run stageRun = recorder.start(id, "S1", stageInput(request, fieldId));
+        StageRunRecorder.Run stageRun = recorder.start(id, STAGE, stageInput(request, fieldId));
         recorder.run(stageRun, generated.degraded() ? "degraded" : "ok",
                 Map.of("question", generated.question()), generated.rawResponse(), generated.model(),
                 generated.promptVersion(), generated.latencyMs(), generated.tokensIn(), generated.tokensOut());

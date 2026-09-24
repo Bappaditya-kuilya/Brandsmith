@@ -152,6 +152,27 @@ class BattleApiTest {
     }
 
     @Test
+    void runWhenLockedReturns409() throws Exception {
+        Session session = sessionWithFinishedBrief();
+        runSync(session);
+        jdbc.update("UPDATE stage_run SET locked = true WHERE session_id = ? AND stage = 'S2'",
+                UUID.fromString(session.id()));
+
+        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/position/run?sync=1")
+                        .cookie(session.owner())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(BattleService.LOCKED_MESSAGE));
+
+        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/position/regenerate")
+                        .cookie(session.owner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"note\":\"try again\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(BattleService.LOCKED_MESSAGE));
+    }
+
+    @Test
     void runRequiresOwnerCookie() throws Exception {
         Session session = sessionWithFinishedBrief();
 

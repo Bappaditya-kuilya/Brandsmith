@@ -49,6 +49,8 @@ public class BattleService {
     public static final String BRIEF_NOT_DONE_MESSAGE =
             "Interview is not finished. Complete the brief before running the Positioning Battle.";
     public static final String NO_POSITIONS_MESSAGE = "Run the Positioning Battle before selecting a position.";
+    public static final String LOCKED_MESSAGE =
+            "Positioning Battle is locked. Unlock it before regenerating.";
 
     static final List<String> MANDATES = List.of("native", "contrarian", "emotional");
     static final String DIVERGE_INSTRUCTION =
@@ -161,6 +163,9 @@ public class BattleService {
         brief.ensureFields();
         if (!brief.isDone()) {
             throw new ResponseStatusException(CONFLICT, BRIEF_NOT_DONE_MESSAGE);
+        }
+        if (sessions.stageLocked(id, STAGE)) {
+            throw new ResponseStatusException(CONFLICT, LOCKED_MESSAGE);
         }
         budget.ensureWithinCap(snapshot.spentUsd(), snapshot.capUsd());
         return new Ready(snapshot, brief);

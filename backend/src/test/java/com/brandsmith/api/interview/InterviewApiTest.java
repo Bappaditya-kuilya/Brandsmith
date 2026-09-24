@@ -10,11 +10,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,6 +40,9 @@ class InterviewApiTest {
 
     @Autowired
     private ObjectMapper mapper;
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     private record Session(String id, MockCookie owner) {
     }
@@ -136,6 +142,21 @@ class InterviewApiTest {
                         .content("{\"fields\":{\"bogus\":{\"value\":\"x\"}}}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").exists());
+    }
+
+    @Test
+    void answerWhenLockedReturns409() throws Exception {
+        Session session = createSession();
+        postAnswer(session, "{}");
+        jdbc.update("UPDATE stage_run SET locked = true WHERE session_id = ? AND stage = 'S1'",
+                UUID.fromString(session.id()));
+
+        mockMvc.perform(post("/api/sessions/" + session.id() + "/interview/answer")
+                        .cookie(session.owner())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"answer\":\"A real answer\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value(S1InterviewService.LOCKED_MESSAGE));
     }
 
     @Test
