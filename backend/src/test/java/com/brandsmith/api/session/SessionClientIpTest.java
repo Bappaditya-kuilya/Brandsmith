@@ -42,4 +42,18 @@ class SessionClientIpTest {
         rfc1918.setRemoteAddr("10.1.2.3");
         assertEquals("198.51.100.8", SessionController.clientIp("198.51.100.8", rfc1918));
     }
+
+    @Test
+    void takesRightmostNonTrustedHopNotLeftmost() {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRemoteAddr("127.0.0.1");
+        assertEquals("9.9.9.9", SessionController.clientIp("1.2.3.4, 9.9.9.9, 10.0.0.1", req));
+    }
+
+    @Test
+    void fallsBackToRemoteWhenAllHopsAreTrusted() {
+        MockHttpServletRequest req = new MockHttpServletRequest();
+        req.setRemoteAddr("127.0.0.1");
+        assertEquals("127.0.0.1", SessionController.clientIp("10.0.0.5, 10.0.0.1", req));
+    }
 }

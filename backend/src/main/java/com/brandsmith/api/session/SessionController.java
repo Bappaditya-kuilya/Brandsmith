@@ -87,16 +87,29 @@ public class SessionController {
     static String clientIp(String forwardedFor, HttpServletRequest request) {
         // Only trust XFF from loopback/private hops (Cloudspaces proxy); otherwise a client can spoof buckets.
         String remote = request.getRemoteAddr();
-        boolean trustedProxy = remote == null
-                || remote.equals("127.0.0.1")
-                || remote.equals("::1")
-                || remote.startsWith("10.")
-                || remote.startsWith("192.168.")
-                || remote.matches("172\\.(1[6-9]|2\\d|3[01])\\..*")
-                || remote.equals("172.18.0.1"); // docker bridge
-        if (trustedProxy && forwardedFor != null && !forwardedFor.isBlank()) {
-            return forwardedFor.split(",")[0].strip();
+        if (!isTrustedProxy(remote)) {
+            return remote;
+        }
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            // Walk from the right: the rightmost non-proxy hop is the actual client; earlier hops are client-set.
+            String[] hops = forwardedFor.split(",");
+            for (int i = hops.length - 1; i >= 0; i--) {
+                String hop = hops[i].strip();
+                if (!hop.isEmpty() && !isTrustedProxy(hop)) {
+                    return hop;
+                }
+            }
         }
         return remote;
+    }
+
+    private static boolean isTrustedProxy(String addr) {
+        return addr == null
+                || addr.equals("127.0.0.1")
+                || addr.equals("::1")
+                || addr.startsWith("10.")
+                || addr.startsWith("192.168.")
+                || addr.matches("172\\.(1[6-9]|2\\d|3[01])\\..*")
+                || addr.equals("172.18.0.1"); // docker bridge
     }
 }
