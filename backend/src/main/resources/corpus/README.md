@@ -1,3 +1,0 @@
-# Overused-phrase corpus
-
-Heuristic corpus, generated once and curated by hand. Not ground truth. `overused-phrases.txt` holds one overused tagline, name or positioning phrase per line; `corpus-vectors.json` (optional, built by `scripts/build-corpus-vectors.sh` or `CorpusVectorBuilder`) aligns one vector per line index. When no `OPENAI_API_KEY` is set, `HashEmbedder` — a deterministic 64-dim hash-based bag-of-words — is the dev fallback for both corpus vectors and query embeddings, so cosine similarity still ranks shared vocabulary higher without calling any paid API; if the vectors file is missing or misaligned at boot, the loader rebuilds those fallback vectors in memory from the phrase list.
