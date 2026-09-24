@@ -58,7 +58,7 @@ export GROQ_API_KEY=gsk_...        # free tier, preferred — or GEMINI_API_KEY 
 cd backend && mvn spring-boot:run
 
 # 3. Frontend (port 5173, proxies /api to :8080)
-cd frontend && npm install && npm run dev
+cd frontend && npm ci && npm run dev
 ```
 
 Or start compose + backend + frontend together:

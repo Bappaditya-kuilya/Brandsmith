@@ -34,6 +34,6 @@ done
 trap 'kill 0' EXIT INT TERM
 
 (cd backend && mvn -q spring-boot:run) &
-(cd frontend && npm install --silent && npm run dev -- --host 0.0.0.0 --port 5173) &
+(cd frontend && npm ci --silent && npm run dev -- --host 0.0.0.0 --port 5173) &
 
 wait
