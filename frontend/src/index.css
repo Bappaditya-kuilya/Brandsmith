@@ -1,0 +1,47 @@
+@import './design-system.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Print: hide session chrome, black on white for browser-print PDF. */
+@media print {
+  nav[aria-label='Pipeline stages'],
+  #glass-box-drawer,
+  button[aria-controls='glass-box-drawer'] {
+    display: none !important;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Flatten text colors to black; leave backgrounds alone so palette swatches survive. */
+  body * {
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  /* Kit: full-width, no page chrome, keep sections intact across page breaks. */
+  [data-stub='kit-page'],
+  [data-stub='share-page'] {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  [data-stub='kit-board'] section {
+    break-inside: avoid;
+  }
+
+  [data-stub='kit-board'] h1,
+  [data-stub='kit-board'] h2 {
+    break-after: avoid;
+  }
+}

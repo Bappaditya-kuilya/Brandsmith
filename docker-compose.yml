@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: brandsmith
+      POSTGRES_PASSWORD: brandsmith
+      POSTGRES_DB: brandsmith
+    ports:
+      - "5432:5432"
+    volumes:
+      - brandsmith-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U brandsmith -d brandsmith"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  brandsmith-pgdata:

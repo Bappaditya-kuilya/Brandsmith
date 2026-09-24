@@ -1,0 +1,117 @@
+# Curated cliche list for lexicon anti-generic scoring.
+# Lowercase; lines starting with # are comments.
+# Lines starting with - match word suffixes (e.g. -ify, -ly).
+
+# Tagline verbs / marketing verbs
+empower
+unlock
+unleash
+revolutionize
+seamless
+seamlessly
+elevate
+transform
+transformative
+ignite
+reimagine
+disrupt
+disruptive
+supercharge
+amplify
+catalyze
+spearhead
+accelerate
+champion
+harness
+masterclass
+paradigm
+synergy
+synergize
+leverage
+optimize
+streamline
+craft
+curate
+deliver
+unlocking
+unlocked
+powered by
+built for
+designed for
+
+# Name / word suffixes
+-ify
+-ly
+
+# Overused tagline phrases
+cutting edge
+cutting-edge
+next level
+next-level
+game changer
+game-changer
+game changing
+world class
+world-class
+best in class
+best-in-class
+state of the art
+state-of-the-art
+one stop
+one-stop
+at the end of the day
+in today's world
+take your to the next
+the power of
+unlock the
+endless possibilities
+your one stop shop
+seamless integration
+seamlessly integrate
+effortlessly
+effortless
+effortless power
+future proof
+future-proof
+next gen
+next-gen
+next generation
+world changing
+world-changing
+
+# Visual tropes
+lightbulb
+light bulb
+rocket
+rocketship
+rocket ship
+purple gradient
+gradient
+swoosh
+circuit board
+circuit
+dna helix
+helix
+handshake
+north star
+sparkle
+glow
+burst
+
+# AI-slop filler words
+innovative
+robust
+holistic
+cutting
+unlocking the potential
+unparalleled
+unstoppable
+seamless experience
+elevate your
+empower your
+unlock your
+transform your
+ignite your
+amplify your
+reimagine your
+revolutionize your

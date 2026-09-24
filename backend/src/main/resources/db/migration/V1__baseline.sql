@@ -1,0 +1,1 @@
+-- Baseline migration. Application tables land in V2+.

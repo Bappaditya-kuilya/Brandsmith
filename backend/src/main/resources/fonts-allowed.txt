@@ -1,0 +1,26 @@
+# Allowed logo font pair ids (placeholder set; 24 curated pairs land with S6).
+# SvgLogoRenderer rejects any fontId not listed here.
+display-sans
+display-serif
+body-sans
+body-serif
+mono-display
+mono-body
+geometric-sans
+humanist-sans
+grotesque-sans
+transitional-serif
+oldstyle-serif
+slab-serif
+rounded-sans
+condensed-sans
+wide-sans
+script-formal
+script-casual
+handwritten
+heavy-display
+light-display
+black-serif
+italic-serif
+variable-sans
+variable-serif

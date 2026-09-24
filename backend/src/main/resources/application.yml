@@ -1,0 +1,43 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: brandsmith-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/brandsmith}
+    username: ${DB_USER:brandsmith}
+    password: ${DB_PASSWORD:brandsmith}
+  flyway:
+    enabled: true
+
+brandsmith:
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,https://*.litng.ai,https://*.cloudspaces.litng.ai}
+  cookies:
+    secure: ${COOKIE_SECURE:false}
+  session:
+    ttl-days: ${SESSION_TTL_DAYS:30}
+  budget:
+    default-cap: ${BUDGET_CAP_USD:0.40}
+  rate-limit:
+    create-capacity: ${RATE_LIMIT_CAPACITY:10}
+    create-refill-per-minute: ${RATE_LIMIT_REFILL:10}
+  embedding:
+    api-key: ${OPENAI_API_KEY:}
+  llm:
+    provider: ${LLM_PROVIDER:auto}   # auto|groq|gemini|anthropic|none
+    api-key: ${ANTHROPIC_API_KEY:}
+    groq-api-key: ${GROQ_API_KEY:}
+    gemini-api-key: ${GEMINI_API_KEY:}
+    main-model: ${LLM_MAIN_MODEL:}   # empty = provider default
+    small-model: ${LLM_SMALL_MODEL:}
+    timeout-ms: ${LLM_TIMEOUT_MS:60000}
+    pricing:   # empty = provider default (0.0 on free-tier groq/gemini)
+      main-input-per-mtok: ${LLM_MAIN_IN_PRICE:}
+      main-output-per-mtok: ${LLM_MAIN_OUT_PRICE:}
+      small-input-per-mtok: ${LLM_SMALL_IN_PRICE:}
+      small-output-per-mtok: ${LLM_SMALL_OUT_PRICE:}
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %-5level %msg%n"

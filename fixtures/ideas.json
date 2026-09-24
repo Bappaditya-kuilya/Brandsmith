@@ -1,0 +1,62 @@
+[
+  {
+    "id": "fx-01-student-tool",
+    "idea": "A tool that helps university students form study groups before midterm week instead of begging in group chats",
+    "persona": "student founder",
+    "notes": "Clear audience and moment; tests sharp-brief path (few interview questions)."
+  },
+  {
+    "id": "fx-02-creator-newsletter",
+    "idea": "A weekly newsletter that breaks down one indie maker's revenue numbers so other creators can copy what works",
+    "persona": "creator",
+    "notes": "Creator economy; tests voice specificity and anti-generic taglines."
+  },
+  {
+    "id": "fx-03-community-club",
+    "idea": "A weekend running club for night-shift nurses who can never make 6am group runs",
+    "persona": "community lead",
+    "notes": "Community, not product; tests emotional-anchor positioning."
+  },
+  {
+    "id": "fx-04-local-business",
+    "idea": "A one-chair barbershop in a small town that only cuts hair for guys over 70 and knows every story in town",
+    "persona": "local business owner",
+    "notes": "Local service; tests category-native vs contrarian frames."
+  },
+  {
+    "id": "fx-05-b2b",
+    "idea": "Compliance checklists for small freight brokers who lose contracts over missing paperwork",
+    "persona": "b2b operator",
+    "notes": "B2B with a painful current alternative; tests proof points and credibility."
+  },
+  {
+    "id": "fx-06-vague",
+    "idea": "something for people",
+    "persona": "first-timer",
+    "notes": "Deliberately vague. Tests adaptive interview: must ask at least 4 questions, flag assumptions."
+  },
+  {
+    "id": "fx-07-generic",
+    "idea": "AI-powered productivity app",
+    "persona": "generic submitter",
+    "notes": "Deliberately generic. Baseline should produce the most forgettable kit; anti-generic loop has maximum headroom."
+  },
+  {
+    "id": "fx-08-fitness",
+    "idea": "A strength program for desk workers who sit 9 hours and have never touched a barbell",
+    "persona": "fitness coach",
+    "notes": "Fitness is a cliche-heavy category; tests lexicon and embedding penalty."
+  },
+  {
+    "id": "fx-09-fintech-students",
+    "idea": "An app that splits shared flat bills and chases flatmates so students stop fronting rent",
+    "persona": "student fintech",
+    "notes": "Fintech for students; tests trust/credibility dimension with a cautious audience."
+  },
+  {
+    "id": "fx-10-oss-maintainers",
+    "idea": "A sponsorship dashboard for open-source maintainers who are tired of guessing who funds which dependency",
+    "persona": "developer tools",
+    "notes": "OSS audience is allergic to marketing fluff; hard test for voice and banned-word checks."
+  }
+]

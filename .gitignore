@@ -1,0 +1,38 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+hs_err_pid*
+replay_pid*
+
+# Node / frontend
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# IDE / editors
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+*.swp
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local tooling
+.gstack/

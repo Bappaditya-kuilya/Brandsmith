@@ -1,0 +1,59 @@
+/* Brandsmith design tokens — editorial/technical hybrid.
+   One accent: electrified amber. Ink on warm paper. Mono for scores/meta. */
+
+:root {
+  /* color */
+  --paper: #f7f3ec;
+  --paper-2: #efe9df;
+  --surface: #fffcf7;
+  --ink: #16130e;
+  --ink-2: #3a342b;
+  --ink-3: #6e6659;
+  --line: #e2dbce;
+  --line-2: #c8bfaf;
+  --accent: #ffb020;
+  --accent-strong: #d9890f;
+
+  /* type */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
+    monospace;
+
+  /* space + radius */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius: 0.5rem;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-synthesis-weight: none;
+}
+
+/* Focus stays visible everywhere; components add their own ring color. */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Functional motion only — respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
