@@ -17,10 +17,14 @@ import com.brandsmith.api.battle.BattleService.SseEvent;
 
 import jakarta.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/sessions/{id}/stages/position")
 public class BattleController {
 
+    private static final Logger log = LoggerFactory.getLogger(BattleController.class);
     private static final String COOKIE_NAME = "owner_token";
     private static final long SSE_TIMEOUT_MS = 120_000;
 
@@ -49,10 +53,11 @@ public class BattleController {
                 service.run(id, token, note, event -> send(emitter, event));
                 emitter.complete();
             } catch (Exception e) {
+                log.error("Positioning Battle SSE run failed", e);
                 try {
                     send(emitter, new SseEvent("error", Map.of(
                             "stage", BattleService.STAGE,
-                            "message", e.getMessage() == null ? "Positioning Battle failed" : e.getMessage())));
+                            "message", "Positioning Battle failed")));
                 } catch (RuntimeException ignored) {
                     // client already disconnected
                 }
