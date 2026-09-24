@@ -1,12 +1,11 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/:path*",
-      "destination": "https://5173-01m17kk0ctxf49jxpa8svyymv9.cloudspaces.litng.ai/api/:path*"
+      "src": "/api/(.*)",
+      "dest": "${API_ORIGIN}/api/$1",
+      "env": ["API_ORIGIN"]
     },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
