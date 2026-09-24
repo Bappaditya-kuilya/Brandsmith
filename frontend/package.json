@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types src/lib/stages.check.ts && node --experimental-strip-types checks/position.judge.check.ts"
+    "test": "node --experimental-strip-types src/lib/stages.check.ts && node --experimental-strip-types checks/position.judge.check.ts && node --experimental-strip-types checks/useSse.check.ts && node --experimental-strip-types checks/wcag.check.ts"
   },
   "dependencies": {
     "react": "^18.3.1",
