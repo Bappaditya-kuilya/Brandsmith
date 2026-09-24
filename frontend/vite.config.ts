@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    allowedHosts: true,
+    allowedHosts: ['localhost', '127.0.0.1', '5173-01m17kk0ctxf49jxpa8svyymv9.cloudspaces.litng.ai', 'brandsmith-seven.vercel.app'],
     proxy: {
       '/api': process.env.API_PROXY || 'http://localhost:8080',
     },
