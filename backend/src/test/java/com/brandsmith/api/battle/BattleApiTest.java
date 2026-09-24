@@ -232,8 +232,6 @@ class BattleApiTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andReturn();
 
-        assertTrue(mvc.getResponse().getContentType().contains("text/event-stream"));
-
         String body = "";
         long deadline = System.currentTimeMillis() + 5000;
         while (System.currentTimeMillis() < deadline) {
@@ -247,6 +245,10 @@ class BattleApiTest {
         assertTrue(body.contains("progress"), "missing progress: " + body);
         assertTrue(body.contains("stage_completed"), "missing stage_completed: " + body);
         assertTrue(body.contains("\"positions\""), "stage_completed missing positions: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
 
         if (mvc.getRequest().isAsyncStarted()) {
             mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
