@@ -11,13 +11,13 @@
     "test": "node --experimental-strip-types src/lib/stages.check.ts && node --experimental-strip-types checks/position.judge.check.ts && node --experimental-strip-types checks/useSse.check.ts && node --experimental-strip-types checks/wcag.check.ts"
   },
   "dependencies": {
-    "react": "^18.3.1",
+    "react": "^19.3.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@types/react": "^18.3.31",
+    "@types/react": "^19.3.0",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.6.1",
