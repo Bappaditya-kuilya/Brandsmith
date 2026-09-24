@@ -27,11 +27,12 @@ page.on('pageerror', (e) => pageErrors.push(String(e)))
 page.setDefaultTimeout(20000)
 
 try {
-  // T1: home smoke
+  // T1: home smoke (logo is an <img> inside h1 — alt carries the name)
   await page.goto(BASE + '/', { waitUntil: 'networkidle' })
   const h1 = await page.textContent('h1')
-  if (h1?.includes('Brandsmith')) ok('home renders')
-  else bad('home renders', `h1=${h1}`)
+  const logoAlt = await page.getAttribute('h1 img', 'alt')
+  if (`${h1 ?? ''}${logoAlt ?? ''}`.includes('Brandsmith')) ok('home renders')
+  else bad('home renders', `h1=${h1} alt=${logoAlt}`)
 
   // T2: create session
   await page.fill('#idea', IDEA)
@@ -50,12 +51,16 @@ try {
       ta,
       'Night-shift nurses need calm, fast coffee and quiet seating; open 9pm to 7am, $6 drip.',
     )
+    const qBefore = (await page.textContent('h1')) ?? ''
     await page.click('button:has-text("Submit")')
+    // Wait for the *response* to land (brief URL or new question in h1).
+    // The old textarea stays mounted until then — waiting on it returns
+    // instantly on the stale node, and fill then dies mid-redirect.
     await page.waitForFunction(
-      () =>
+      (prev) =>
         location.pathname.includes('/brief') ||
-        Boolean(document.querySelector('textarea[placeholder^="Answer in a sentence"]')),
-      undefined,
+        (document.querySelector('h1')?.textContent ?? '') !== prev,
+      qBefore,
       { timeout: 25000 },
     )
   }
