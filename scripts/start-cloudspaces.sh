@@ -13,7 +13,7 @@ fi
 export PATH="${HOME}/.local/bin:${HOME}/.tools/apache-maven-3.9.11/bin:${PATH}"
 
 # Public origin Cloudspaces proxies (Vite is same-origin via /api, but Spring still checks Origin).
-export CORS_ORIGINS="${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,https://*.litng.ai,https://*.cloudspaces.litng.ai,https://*.vercel.app}"
+export CORS_ORIGINS="${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,https://brandsmith-seven.vercel.app,https://5173-01m17kk0ctxf49jxpa8svyymv9.cloudspaces.litng.ai}"
 # HTTPS deploy: cookies must be Secure
 if [ "${SECURE_COOKIES:-}" = "1" ]; then
   export COOKIE_SECURE=true
