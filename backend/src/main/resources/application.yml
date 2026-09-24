@@ -12,7 +12,7 @@ spring:
     enabled: true
 
 brandsmith:
-  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,https://*.litng.ai,https://*.cloudspaces.litng.ai}
+  cors-origins: ${CORS_ORIGINS:http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173,https://*.litng.ai,https://*.cloudspaces.litng.ai,https://*.vercel.app}
   cookies:
     secure: ${COOKIE_SECURE:false}
   session:
