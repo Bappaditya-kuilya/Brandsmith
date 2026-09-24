@@ -102,13 +102,21 @@ function Home() {
     <main className="mx-auto flex min-h-svh max-w-xl flex-col justify-center gap-8 p-8">
       <header className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-xsst text-ink-3">
+          <span className="font-mono text-xs text-ink-3">
             Brand kit studio
           </span>
           <HealthBadge />
         </div>
         <div className="border-t-2 border-ink pt-4">
-          <h1 className="text-5xl font-bold tracking-tighter text-ink">Brandsmith</h1>
+          <h1>
+            <img
+              src="/logo.png"
+              alt="Brandsmith"
+              width={471}
+              height={74}
+              className="h-14 w-auto"
+            />
+          </h1>
           <p className="mt-2 text-lg text-ink-2">One sentence to a launch-ready brand kit.</p>
         </div>
       </header>
