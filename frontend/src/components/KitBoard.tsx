@@ -5,7 +5,7 @@ function Field({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null
   return (
     <div>
-      <dt className="text-xs font-medium uppercase tracking-wide text-ink-3">{label}</dt>
+      <dt className="text-xs font-medium text-ink-3">{label}</dt>
       <dd className="mt-0.5 text-sm text-ink">{value}</dd>
     </div>
   )
@@ -19,7 +19,7 @@ function VoiceSummary({ voice }: { voice: VoiceSpec }) {
       <Field label="Sentence length" value={`${min}–${max} words`} />
       <Field label="Humor" value={voice.humorLevel} />
       <div>
-        <dt className="text-xs font-medium uppercase tracking-wide text-ink-3">Banned words</dt>
+        <dt className="text-xs font-medium text-ink-3">Banned words</dt>
         <dd className="mt-1 flex flex-wrap gap-1">
           {voice.bannedWords.length === 0 ? (
             <span className="text-sm text-ink-3">None</span>
@@ -37,7 +37,7 @@ function VoiceSummary({ voice }: { voice: VoiceSpec }) {
       </div>
       {voice.signatureMoves.length > 0 && (
         <div className="sm:col-span-2">
-          <dt className="text-xs font-medium uppercase tracking-wide text-ink-3">
+          <dt className="text-xs font-medium text-ink-3">
             Signature moves
           </dt>
           <dd>
@@ -80,21 +80,21 @@ function AssetsSection({ assets }: { assets: LaunchAssets }) {
   return (
     <div className="space-y-4" data-stub="kit-assets">
       <div className="rounded-lg border border-line bg-surface p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Hero</p>
+        <p className="text-xs font-medium text-ink-3">Hero</p>
         <p className="mt-1 text-lg font-semibold text-ink">{assets.hero.headline}</p>
         <p className="mt-0.5 text-sm text-ink-2">{assets.hero.subhead}</p>
-        <p className="mt-2 inline-block rounded-md bg-accent px-3 py-1 text-xs font-semibold text-ink">
+        <p className="mt-2 inline-block rounded-full bg-accent px-3 py-1 text-xs font-semibold text-ink">
           {assets.hero.cta}
         </p>
       </div>
 
       <div className="rounded-lg border border-line bg-surface p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Pitch</p>
+        <p className="text-xs font-medium text-ink-3">Pitch</p>
         <p className="mt-1 text-sm text-ink">{assets.pitch}</p>
       </div>
 
       <div className="rounded-lg border border-line bg-surface p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Social posts</p>
+        <p className="text-xs font-medium text-ink-3">Social posts</p>
         <ol className="mt-2 list-decimal space-y-2 pl-5 text-sm text-ink">
           {assets.posts.map((post, i) => (
             <li key={i}>{post}</li>
@@ -104,11 +104,11 @@ function AssetsSection({ assets }: { assets: LaunchAssets }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Bio · short</p>
+          <p className="text-xs font-medium text-ink-3">Bio · short</p>
           <p className="mt-1 text-sm text-ink">{assets.bioShort}</p>
         </div>
         <div className="rounded-lg border border-line bg-surface p-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Bio · long</p>
+          <p className="text-xs font-medium text-ink-3">Bio · long</p>
           <p className="mt-1 text-sm text-ink">{assets.bioLong}</p>
         </div>
       </div>

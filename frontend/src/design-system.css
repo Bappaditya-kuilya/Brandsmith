@@ -1,22 +1,23 @@
-/* Brandsmith design tokens — editorial/technical hybrid.
-   One accent: electrified amber. Ink on warm paper. Mono for scores/meta. */
+/* Brandsmith design tokens — Chippytea brand.
+   Hand-drawn macOS utility: rounded type, charcoal on cream,
+   chip-yellow accent, borders over shadows. */
 
 :root {
   /* color */
-  --paper: #f7f3ec;
-  --paper-2: #efe9df;
-  --surface: #fffcf7;
-  --ink: #16130e;
-  --ink-2: #3a342b;
-  --ink-3: #6e6659;
-  --line: #e2dbce;
-  --line-2: #c8bfaf;
-  --accent: #ffb020;
-  --accent-strong: #d9890f;
+  --paper: #faf5ea;
+  --paper-2: #efe9da;
+  --surface: #fffdf8;
+  --ink: #33302b;
+  --ink-2: #4f4a43;
+  --ink-3: #6f685e;
+  --line: #e5e7eb;
+  --line-2: #d1d5db;
+  --accent: #f3b338;
+  --accent-strong: #d99a14;
 
   /* type */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
+  --font-sans: ui-rounded, -apple-system, BlinkMacSystemFont, 'SF Pro Rounded',
+    'Segoe UI', system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono',
     monospace;
 

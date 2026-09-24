@@ -68,7 +68,7 @@ export function GlassBoxDrawer({
         aria-modal={open}
         aria-label="Glass Box"
         aria-hidden={!open}
-        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md transform flex-col border-l border-line bg-surface shadow-xl transition-transform duration-200 ${
+        className={`fixed inset-y-0 right-0 z-50 flex w-full max-w-md transform flex-col border-l border-line bg-surface transition-transform duration-200 ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -99,7 +99,7 @@ export function GlassBoxDrawer({
                 disabled={lockBusy}
                 onClick={() => onToggleLock(current)}
                 aria-pressed={currentRun.locked}
-                className="rounded-md border border-line-2 bg-surface px-2 py-1 text-xs font-semibold text-ink-2 shadow-sm hover:bg-line focus:outline-none focus-visible:ring-2 focus-visible:ring-ink disabled:opacity-50"
+                className="rounded-sm border border-line-2 bg-surface px-2 py-1 text-xs font-semibold text-ink-2 hover:bg-line focus:outline-none focus-visible:ring-2 focus-visible:ring-ink disabled:opacity-50"
               >
                 {currentRun.locked ? 'Unlock' : 'Lock'}
               </button>

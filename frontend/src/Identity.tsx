@@ -48,7 +48,7 @@ function VoicePanel({ voice }: { voice: VoiceSpec }) {
       <div className="rounded-lg border border-line bg-surface p-4">
         <div className="space-y-4">
           <div>
-            <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+            <span className="text-xs font-medium text-ink-3">
               Formality
             </span>
             <label htmlFor="formality" className="sr-only">
@@ -74,7 +74,7 @@ function VoicePanel({ voice }: { voice: VoiceSpec }) {
 
           <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="rounded-md bg-paper-2 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-ink-3">
+              <dt className="text-xs font-medium text-ink-3">
                 Sentence length
               </dt>
               <dd className="mt-1 text-sm text-ink">
@@ -82,13 +82,13 @@ function VoicePanel({ voice }: { voice: VoiceSpec }) {
               </dd>
             </div>
             <div className="rounded-md bg-paper-2 p-3">
-              <dt className="text-xs font-medium uppercase tracking-wide text-ink-3">Humor</dt>
+              <dt className="text-xs font-medium text-ink-3">Humor</dt>
               <dd className="mt-1 text-sm capitalize text-ink">{voice.humorLevel}</dd>
             </div>
           </dl>
 
           <div>
-            <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+            <span className="text-xs font-medium text-ink-3">
               Banned words
             </span>
             <ul className="mt-2 flex flex-wrap gap-1.5">
@@ -107,7 +107,7 @@ function VoicePanel({ voice }: { voice: VoiceSpec }) {
           </div>
 
           <div>
-            <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+            <span className="text-xs font-medium text-ink-3">
               Signature moves
             </span>
             <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-ink">
@@ -147,7 +147,7 @@ function PersonalitySection({
             <h3 className="text-sm font-semibold text-ink">{trait.name}</h3>
             <div className="space-y-1.5 text-sm">
               <div>
-                <span className="block text-xs font-medium uppercase tracking-wide text-ink-3">
+                <span className="block text-xs font-medium text-ink-3">
                   Why it fits
                 </span>
                 <p className="mt-0.5 border-l-2 border-accent pl-2 italic text-ink-2">
@@ -155,13 +155,13 @@ function PersonalitySection({
                 </p>
               </div>
               <div>
-                <span className="block text-xs font-medium uppercase tracking-wide text-ink-3">
+                <span className="block text-xs font-medium text-ink-3">
                   Behavior
                 </span>
                 <p className="mt-0.5 text-ink">{trait.behavior}</p>
               </div>
               <div>
-                <span className="block text-xs font-medium uppercase tracking-wide text-ink-3">
+                <span className="block text-xs font-medium text-ink-3">
                   Never become
                 </span>
                 <p className="mt-0.5 text-ink">{trait.neverBecome}</p>
@@ -270,7 +270,7 @@ function Identity() {
   return (
     <main className="mx-auto flex min-h-svh max-w-3xl flex-col gap-6 p-8 pb-24">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to="/" className="text-ink-2 hover:underline">
             Brandsmith
           </Link>

@@ -156,7 +156,7 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-8">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/brief`} className="text-ink-2 hover:underline">
             ← Brief
           </Link>
@@ -233,7 +233,7 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
                               value={draft?.category ?? ''}
                               onChange={(e) => setDraft((d) => (d ? { ...d, category: e.target.value } : d))}
                               disabled={selecting}
-                              className="w-full rounded-md border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                              className="w-full rounded-sm border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                             />
                           </>
                         ) : (
@@ -242,7 +242,7 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
                       </p>
                     </div>
                     {score && score.total != null && (
-                      <span className="shrink-0 rounded-md bg-line px-2 py-1 text-sm font-bold tabular-nums text-ink">
+                      <span className="shrink-0 rounded-full bg-line px-2 py-1 text-sm font-bold tabular-nums text-ink">
                         {score.total}
                       </span>
                     )}
@@ -250,35 +250,35 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
 
                   <div className="flex-1 space-y-3 text-sm">
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Differentiator</p>
+                      <p className="text-xs font-medium text-ink-3">Differentiator</p>
                       {isEditing ? (
                         <textarea
                           value={draft?.differentiator ?? ''}
                           onChange={(e) => setDraft((d) => (d ? { ...d, differentiator: e.target.value } : d))}
                           rows={3}
                           disabled={selecting}
-                          className="mt-1 w-full resize-y rounded-md border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                          className="mt-1 w-full resize-y rounded-sm border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                         />
                       ) : (
                         <p className="mt-0.5 text-ink-2">{pos.differentiator}</p>
                       )}
                     </div>
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Value proposition</p>
+                      <p className="text-xs font-medium text-ink-3">Value proposition</p>
                       {isEditing ? (
                         <textarea
                           value={draft?.valueProposition ?? ''}
                           onChange={(e) => setDraft((d) => (d ? { ...d, valueProposition: e.target.value } : d))}
                           rows={3}
                           disabled={selecting}
-                          className="mt-1 w-full resize-y rounded-md border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                          className="mt-1 w-full resize-y rounded-sm border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                         />
                       ) : (
                         <p className="mt-0.5 text-ink-2">{pos.valueProposition}</p>
                       )}
                     </div>
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Proof points</p>
+                      <p className="text-xs font-medium text-ink-3">Proof points</p>
                       {isEditing ? (
                         <textarea
                           value={draft?.proofPoints ?? ''}
@@ -286,7 +286,7 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
                           rows={4}
                           disabled={selecting}
                           aria-label={FIELD_LABELS.proofPoints}
-                          className="mt-1 w-full resize-y rounded-md border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                          className="mt-1 w-full resize-y rounded-sm border border-line-2 px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                         />
                       ) : (
                         <ul className="mt-0.5 list-disc space-y-0.5 pl-5 text-ink-2">
@@ -299,7 +299,7 @@ export function PositionBattle({ onStatus }: PositionBattleProps) {
                   </div>
 
                   <div className="mt-4 space-y-2 border-t border-line pt-3">
-                    <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Judge scores</p>
+                    <p className="text-xs font-medium text-ink-3">Judge scores</p>
                     {score ? (
                       <>
                         <ul className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">

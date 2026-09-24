@@ -104,7 +104,7 @@ export function KitPage({ onStatus }: KitPageProps) {
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 p-8" data-stub="kit-page">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/launch`} className="text-ink-2 hover:underline">
             ← Launch
           </Link>

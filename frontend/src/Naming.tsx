@@ -140,7 +140,7 @@ function NameCard({
       <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
         <div>
           <span
-            className="block font-mono text-[10px] font-medium uppercase tracking-widest text-ink-3"
+            className="block font-mono text-[10px] font-mediumst text-ink-3"
             title="Anti-generic score (higher is less generic)"
           >
             Anti-generic
@@ -221,7 +221,7 @@ function TaglineCard({
       <div className="mt-3 flex items-end justify-between gap-3 border-t border-line pt-3">
         <div>
           <span
-            className="block font-mono text-[10px] font-medium uppercase tracking-widest text-ink-3"
+            className="block font-mono text-[10px] font-mediumst text-ink-3"
             title="Anti-generic score (higher is less generic)"
           >
             Anti-generic
@@ -270,22 +270,22 @@ function HierarchyPanel({ messages }: { messages: MessagesStageData }) {
     <div className="space-y-3 rounded-lg border border-line bg-surface p-4">
       {pitch && (
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-3">One-line pitch</p>
+          <p className="text-xs font-medium text-ink-3">One-line pitch</p>
           <p className="mt-1 text-sm text-ink">{pitch}</p>
         </div>
       )}
       <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Message hierarchy</p>
+        <p className="text-xs font-medium text-ink-3">Message hierarchy</p>
         <div className="mt-2 space-y-2 text-sm">
           <div className="border-l-4 border-accent pl-3">
-            <span className="block text-xs font-semibold uppercase tracking-wide text-ink">
+            <span className="block text-xs font-semibold text-ink">
               Primary
             </span>
             <p className="mt-0.5 text-ink">{hierarchy.primary}</p>
           </div>
           {hierarchy.secondary.length > 0 && (
             <div className="border-l-4 border-line pl-3">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-ink-3">
+              <span className="block text-xs font-semibold text-ink-3">
                 Secondary
               </span>
               <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-ink">
@@ -297,7 +297,7 @@ function HierarchyPanel({ messages }: { messages: MessagesStageData }) {
           )}
           {hierarchy.proof.length > 0 && (
             <div className="border-l-4 border-line pl-3">
-              <span className="block text-xs font-semibold uppercase tracking-wide text-ink-3">
+              <span className="block text-xs font-semibold text-ink-3">
                 Proof
               </span>
               <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-ink">
@@ -487,7 +487,7 @@ export function NamingStage({ onStatus }: NamingStageProps) {
   return (
     <section aria-labelledby="naming-heading" className="space-y-4" data-stub="naming-stage">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/identity`} className="text-ink-2 underline hover:text-ink">
             ← Personality
           </Link>
@@ -557,7 +557,7 @@ export function NamingStage({ onStatus }: NamingStageProps) {
             {groups.map((group, gi) => (
               <div key={group.territory?.name ?? gi} className="space-y-3">
                 <div className="border-l-4 border-accent pl-3">
-                  <h3 className="text-sm font-bold uppercase tracking-wide text-ink">
+                  <h3 className="text-sm font-bold text-ink">
                     {group.territory?.name ?? `Territory ${gi + 1}`}
                   </h3>
                   {group.territory?.rationale && (
@@ -619,7 +619,7 @@ export function NamingStage({ onStatus }: NamingStageProps) {
               className="space-y-4 rounded-lg border border-line bg-paper-2/60 p-4"
             >
               <div className="space-y-1">
-                <p className="text-xs font-medium uppercase tracking-wide text-ink-3">
+                <p className="text-xs font-medium text-ink-3">
                   Chosen name
                 </p>
                 <p className="text-lg font-semibold text-ink">{selected}</p>

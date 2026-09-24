@@ -42,7 +42,7 @@ export function SharePage() {
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 p-8" data-stub="share-page">
       <div className="space-y-1">
-        <p className="text-xs font-medium uppercase tracking-wide text-ink-3">
+        <p className="text-xs font-medium text-ink-3">
           Shared brand kit · read-only
         </p>
         <h1 className="text-3xl font-bold tracking-tight text-ink">Brand kit</h1>

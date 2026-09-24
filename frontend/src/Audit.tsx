@@ -68,7 +68,7 @@ function FindingList({ findings, title }: { findings: AuditFinding[]; title: str
   if (!findings.length) return null
   return (
     <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-ink-3">{title}</p>
+      <p className="text-xs font-medium text-ink-3">{title}</p>
       <ul className="space-y-1">
         {findings.map((f, i) => (
           <li
@@ -100,7 +100,7 @@ function DimensionCard({ dim }: { dim: AuditDimension }) {
           <p className="text-xs text-ink-3">Weight {dim.weight}</p>
         </div>
         <span
-          className={`shrink-0 rounded-md px-2 py-1 text-sm font-bold tabular-nums ${
+          className={`shrink-0 rounded-full px-2 py-1 text-sm font-bold tabular-nums ${
             failing ? 'bg-red-100 text-red-700' : 'bg-line text-ink'
           }`}
           title={failing ? `Below ${FAIL_SCORE}` : undefined}
@@ -152,13 +152,13 @@ function DiffCard({ diff }: { diff: AuditDiff }) {
       </div>
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Before</p>
+          <p className="text-xs font-medium text-ink-3">Before</p>
           <p className="mt-1 whitespace-pre-wrap rounded-md border border-red-100 bg-red-50 p-2 text-sm text-ink">
             {diff.before}
           </p>
         </div>
         <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-3">After</p>
+          <p className="text-xs font-medium text-ink-3">After</p>
           <p className="mt-1 whitespace-pre-wrap rounded-md border border-emerald-100 bg-emerald-50 p-2 text-sm text-ink">
             {diff.after}
           </p>
@@ -220,7 +220,7 @@ export function AuditPage({ onStatus }: AuditPageProps) {
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-8">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/naming`} className="text-ink-2 hover:underline">
             ← Naming
           </Link>

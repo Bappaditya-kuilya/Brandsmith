@@ -102,7 +102,7 @@ function Home() {
     <main className="mx-auto flex min-h-svh max-w-xl flex-col justify-center gap-8 p-8">
       <header className="space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-xs uppercase tracking-widest text-ink-3">
+          <span className="font-mono text-xsst text-ink-3">
             Brand kit studio
           </span>
           <HealthBadge />
@@ -146,7 +146,7 @@ function Home() {
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-ink-3">
+          <span className="text-xs font-medium text-ink-3">
             Or try an example
           </span>
           <div className="flex flex-wrap gap-2">

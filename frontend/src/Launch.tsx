@@ -113,7 +113,7 @@ export function LaunchPage({ onStatus }: LaunchPageProps) {
   return (
     <section aria-labelledby="launch-heading" className="space-y-4" data-stub="launch-stage">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/audit`} className="text-ink-2 hover:underline">
             ← Audit
           </Link>

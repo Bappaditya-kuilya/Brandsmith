@@ -118,7 +118,7 @@ export function DriftPage({ onStatus }: DriftPageProps) {
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 p-8">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/audit`} className="text-ink-2 hover:underline">
             ← Consistency audit
           </Link>

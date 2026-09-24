@@ -65,7 +65,7 @@ function BrandBoard({ board }: { board: VisualBoard }) {
   const { palette, logoSvg, fonts, direction } = board
   return (
     <div
-      className="overflow-hidden rounded-xl border border-line shadow-sm"
+      className="overflow-hidden rounded-xl border border-line"
       style={
         {
           backgroundColor: palette.bg,
@@ -78,7 +78,7 @@ function BrandBoard({ board }: { board: VisualBoard }) {
       data-stub="brand-board"
     >
       <div className="flex items-center justify-between px-6 pt-6">
-        <span className="text-xs font-medium uppercase tracking-wide" style={{ color: palette.muted }}>
+        <span className="text-xs font-medium" style={{ color: palette.muted }}>
           Brand board
         </span>
         <span className="text-xs" style={{ color: palette.muted }}>
@@ -201,7 +201,7 @@ function TokenEditor({
           onChange={(e) =>
             onPatch({ saturation: e.target.value as PatchVisualTokensRequest['saturation'] })
           }
-          className="mt-1 w-full rounded-md border border-line-2 bg-surface px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-50"
+          className="mt-1 w-full rounded-sm border border-line-2 bg-surface px-2 py-1.5 text-sm text-ink focus:border-ink focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-50"
         >
           <option value="low">Low</option>
           <option value="medium">Medium</option>
@@ -324,7 +324,7 @@ export function VisualPage({ onStatus }: VisualPageProps) {
   return (
     <section aria-labelledby="visual-heading" className="space-y-4" data-stub="visual-stage">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to={`/s/${id}/naming`} className="text-ink-2 hover:underline">
             ← Naming
           </Link>
@@ -395,7 +395,7 @@ export function VisualPage({ onStatus }: VisualPageProps) {
               <TokenEditor board={board} onPatch={schedulePatch} disabled={patching} />
               <div className="space-y-3 rounded-lg border border-line bg-surface p-4 text-sm">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-ink-3">Mood</p>
+                  <p className="text-xs font-medium text-ink-3">Mood</p>
                   <p className="mt-0.5 flex flex-wrap gap-1.5">
                     {board.direction.moodWords.map((word) => (
                       <span
@@ -408,19 +408,19 @@ export function VisualPage({ onStatus }: VisualPageProps) {
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-ink-3">
+                  <p className="text-xs font-medium text-ink-3">
                     Shape language
                   </p>
                   <p className="mt-0.5 capitalize text-ink">{board.direction.shapeLanguage}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-ink-3">
+                  <p className="text-xs font-medium text-ink-3">
                     Font pair
                   </p>
                   <p className="mt-0.5 text-ink">{board.fonts.join(' + ')}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-ink-3">
+                  <p className="text-xs font-medium text-ink-3">
                     Avoid
                   </p>
                   <p className="mt-0.5 text-ink-2">{board.direction.avoidList.join(', ')}</p>

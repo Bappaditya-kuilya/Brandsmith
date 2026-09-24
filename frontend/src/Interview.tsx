@@ -252,7 +252,7 @@ function Interview() {
   return (
     <main className="mx-auto flex min-h-svh max-w-xl flex-col justify-center gap-6 p-8">
       <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to="/" className="text-ink-2 hover:underline">
             Brandsmith
           </Link>
@@ -271,7 +271,7 @@ function Interview() {
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             {label && (
-              <span className="text-xs font-medium uppercase tracking-wide text-ink-2">
+              <span className="text-xs font-medium text-ink-2">
                 {label}
               </span>
             )}
@@ -398,7 +398,7 @@ function BriefReview() {
   return (
     <main className="mx-auto flex min-h-svh max-w-xl flex-col gap-6 p-8">
       <div className="space-y-1">
-        <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-ink-3">
+        <div className="flex items-center justify-between text-xs font-medium text-ink-3">
           <Link to="/" className="text-ink-2 hover:underline">
             Brandsmith
           </Link>

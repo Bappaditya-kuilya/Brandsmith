@@ -107,7 +107,7 @@ export function AppShell({ children, statuses: pageStatuses = {} }: AppShellProp
             onClick={() => setDrawerOpen(true)}
             aria-expanded={drawerOpen}
             aria-controls="glass-box-drawer"
-            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-2 shadow-sm hover:bg-paper-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-2 hover:bg-paper-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink"
           >
             Glass Box
           </button>
@@ -123,7 +123,7 @@ export function AppShell({ children, statuses: pageStatuses = {} }: AppShellProp
             <button
               type="button"
               onClick={() => void refreshDownstream()}
-              className="rounded-md border border-amber-300 bg-surface px-2.5 py-1 text-xs font-semibold text-amber-900 shadow-sm hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+              className="rounded-sm border border-amber-300 bg-surface px-2.5 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
             >
               Re-run downstream stages
             </button>
