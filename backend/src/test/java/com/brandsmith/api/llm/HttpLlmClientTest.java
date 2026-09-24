@@ -91,7 +91,9 @@ class HttpLlmClientTest {
 
         HttpRequest http = client.buildRequest(request, client.bodyBytes(request));
         assertEquals("https://generativelanguage.googleapis.com/v1beta/models/"
-                + "some-model:generateContent?key=AIza_test", http.uri().toString());
+                + "some-model:generateContent", http.uri().toString());
+        assertEquals("AIza_test", http.headers().firstValue("x-goog-api-key").orElse(""));
+        assertFalse(http.uri().toString().contains("AIza_test"));
 
         LlmClient.Response response = client.parse(GEMINI_JSON, "some-model", 7);
         assertEquals("Hi there", response.text());

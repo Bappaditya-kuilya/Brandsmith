@@ -120,7 +120,7 @@ public class HttpLlmClient implements LlmClient {
     String endpoint(Request request) {
         return switch (provider) {
             case GROQ -> GROQ_ENDPOINT;
-            case GEMINI -> GEMINI_ENDPOINT_PREFIX + request.model() + ":generateContent?key=" + apiKey;
+            case GEMINI -> GEMINI_ENDPOINT_PREFIX + request.model() + ":generateContent";
             case ANTHROPIC -> ANTHROPIC_ENDPOINT;
             case NONE -> throw new IllegalStateException("no LLM provider");
         };
@@ -134,7 +134,7 @@ public class HttpLlmClient implements LlmClient {
         switch (provider) {
             case GROQ -> builder.header("authorization", "Bearer " + apiKey);
             case ANTHROPIC -> builder.header("x-api-key", apiKey).header("anthropic-version", API_VERSION);
-            case GEMINI -> { } // key travels in the URL query, per Gemini API
+            case GEMINI -> builder.header("x-goog-api-key", apiKey);
             case NONE -> { }
         }
         return builder.build();
