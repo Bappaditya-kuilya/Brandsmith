@@ -250,7 +250,7 @@ export async function exportKit(id: string, format: ExportFormat): Promise<void>
   try {
     res = await fetch(
       `/api/sessions/${encodeURIComponent(id)}/export?format=${encodeURIComponent(format)}`,
-      { credentials: 'include' },
+      { method: 'POST', credentials: 'include' },
     )
   } catch {
     throw new ApiError(0, 'Could not reach the server. Check your connection and try again.')
