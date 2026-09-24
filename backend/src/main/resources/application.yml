@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: brandsmith-api
+  http:
+    converters:
+      preferred-json-mapper: jackson2
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/brandsmith}
     username: ${DB_USER:brandsmith}
