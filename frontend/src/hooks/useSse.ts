@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export interface StageStartedData {
   stage: string
@@ -112,23 +112,18 @@ export interface SseStream {
   streaming: boolean
 }
 
-export function useSse(callbacks: SseCallbacks): SseStream {
-  const callbacksRef = useRef(callbacks)
-  useEffect(() => {
-    callbacksRef.current = callbacks
-  }, [callbacks])
-  const abortRef = useRef<AbortController | null>(null)
-  const [streaming, setStreaming] = useState(false)
+export function createSseRunner(
+  initialCallbacks: SseCallbacks,
+  onStreamingChange?: (streaming: boolean) => void,
+) {
+  let callbacks = initialCallbacks
+  let controller: AbortController | null = null
 
-  const cancel = useCallback(() => {
-    abortRef.current?.abort()
-  }, [])
-
-  const run = useCallback(async (path: string, body?: unknown) => {
-    abortRef.current?.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-    setStreaming(true)
+  async function run(path: string, body?: unknown) {
+    controller?.abort()
+    const active = new AbortController()
+    controller = active
+    onStreamingChange?.(true)
 
     try {
       const res = await fetch(path, {
@@ -139,17 +134,21 @@ export function useSse(callbacks: SseCallbacks): SseStream {
           ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
         },
         body: body !== undefined ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
+        signal: active.signal,
       })
 
       if (!res.ok || !res.body) {
-        callbacksRef.current.onError?.({ message: `Stream failed (${res.status}). Retry to resume this stage.` })
+        callbacks.onError?.({ message: `Stream failed (${res.status}). Retry to resume this stage.` })
         return
       }
 
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
-      const parser = createSseParser((event, data) => routeEvent(event, data, callbacksRef.current))
+      let settled = false
+      const parser = createSseParser((event, data) => {
+        if (event === 'stage_completed' || event === 'error') settled = true
+        routeEvent(event, data, callbacks)
+      })
 
       for (;;) {
         const { done, value } = await reader.read()
@@ -158,18 +157,43 @@ export function useSse(callbacks: SseCallbacks): SseStream {
       }
       parser.push(decoder.decode())
       parser.flush()
+
+      if (!settled && !active.signal.aborted) {
+        callbacks.onError?.({
+          message: 'Stream ended before this stage completed. Retry to resume this stage.',
+        })
+      }
     } catch (err) {
-      if (controller.signal.aborted) return
-      callbacksRef.current.onError?.({
+      if (active.signal.aborted) return
+      callbacks.onError?.({
         message: err instanceof Error && err.message ? err.message : 'Connection dropped mid-run.',
       })
     } finally {
-      if (abortRef.current === controller) {
-        abortRef.current = null
-        setStreaming(false)
+      if (controller === active) {
+        controller = null
+        onStreamingChange?.(false)
       }
     }
-  }, [])
+  }
 
-  return { run, cancel, streaming }
+  const abort = () => controller?.abort()
+  return {
+    run,
+    cancel: abort,
+    unmount: abort,
+    setCallbacks: (next: SseCallbacks) => {
+      callbacks = next
+    },
+  }
+}
+
+export function useSse(callbacks: SseCallbacks): SseStream {
+  const [streaming, setStreaming] = useState(false)
+  const [runner] = useState(() => createSseRunner(callbacks, setStreaming))
+  useEffect(() => {
+    runner.setCallbacks(callbacks)
+  }, [runner, callbacks])
+  useEffect(() => () => runner.unmount(), [runner])
+
+  return { run: runner.run, cancel: runner.cancel, streaming }
 }
