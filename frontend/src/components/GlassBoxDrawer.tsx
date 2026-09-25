@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { StageRun } from '../api/types'
-import type { StageId } from '../lib/stages'
+import { latestRuns, type StageId } from '../lib/stages'
 
 export interface GlassBoxDrawerProps {
   open: boolean
@@ -44,7 +44,7 @@ export function GlassBoxDrawer({
     return () => window.removeEventListener('keydown', onKeydown)
   }, [open, onClose])
 
-  const currentRun = current ? runs.find((r) => r.stage === current) : undefined
+  const currentRun = current ? latestRuns(runs).get(current) : undefined
   // Backend lock accepts S0–S8 only (not kit/drift).
   const canToggle =
     /^S[0-8]$/.test(current ?? '') &&
