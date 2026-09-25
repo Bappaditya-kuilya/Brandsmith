@@ -276,7 +276,7 @@ function Interview() {
               </span>
             )}
             <h1 className="text-2xl font-semibold leading-snug text-ink">
-              {question ?? 'Loading the next question…'}
+              {question ?? 'Interview'}
             </h1>
           </div>
 
