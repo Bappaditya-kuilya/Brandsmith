@@ -328,7 +328,7 @@ public class MessagesService {
         List<String> raws = List.of(
                 name + " skips the " + shortNoun(problem),
                 outcome + " without the " + shortNoun(problem),
-                "Form the group before midterms");
+                name + " for " + audience);
         List<TaglineOption> taglines = new ArrayList<>(raws.size());
         for (String raw : raws) {
             taglines.add(scoredOffline(raw));

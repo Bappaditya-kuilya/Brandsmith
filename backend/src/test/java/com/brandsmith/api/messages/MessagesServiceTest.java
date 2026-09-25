@@ -156,6 +156,24 @@ class MessagesServiceTest {
     }
 
     @Test
+    void degradedTaglinesDeriveAudienceFromBriefInsteadOfHardcodedCopy() {
+        briefStore.set(Map.of(
+                "idea", "A study group app for students",
+                "fields", Map.of("target_user",
+                        Map.of("value", "night-shift nursing students", "confidence", 0.9))));
+
+        MessagesService.RunResult result = service(new NoKeyLlm()).run(sessionId, "tok", null);
+
+        List<String> texts = result.output().taglines().stream().map(TaglineOption::text).toList();
+        assertTrue(result.degraded());
+        assertTrue(texts.size() >= 3, "expected >=3 taglines, got " + texts.size());
+        assertTrue(texts.stream().anyMatch(t -> t.contains("night-shift nursing students")),
+                "taglines should carry the brief audience: " + texts);
+        assertFalse(texts.stream().anyMatch(t -> t.contains("midterms")),
+                "hardcoded midterms copy must be gone: " + texts);
+    }
+
+    @Test
     void runWithoutNameReturns409AndSkipsGeneration() {
         dnaStore.set(Map.of());
         FakeLlmClient fake = new FakeLlmClient(DRAFT_JSON);
