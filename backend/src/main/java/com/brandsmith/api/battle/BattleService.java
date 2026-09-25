@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.brandsmith.api.battle.JudgeResult.DifferenceCheck;
 import com.brandsmith.api.battle.JudgeResult.Regenerated;
 import com.brandsmith.api.budget.BudgetGuard;
 import com.brandsmith.api.interview.BriefField;
@@ -140,12 +141,16 @@ public class BattleService {
             JudgeOutcome second = judge(id, brief, positionsOf(runs),
                     ready.snapshot().spentUsd() + cost, ready.snapshot().capUsd());
             cost += costOf(second);
-            judgeResult = new JudgeResult(second.result().scores(),
-                    List.of(new Regenerated(weakerMandate, otherMandate,
-                            "shared category frame and similar differentiator")));
-            if (findCollision(positionsOf(runs)) != null) {
+            boolean stillColliding = findCollision(positionsOf(runs)) != null;
+            if (stillColliding) {
                 log.warn("S2 difference check still collides after one diverge regeneration");
             }
+            judgeResult = new JudgeResult(second.result().scores(),
+                    List.of(new Regenerated(weakerMandate, otherMandate,
+                            "shared category frame and similar differentiator")),
+                    new DifferenceCheck(!stillColliding,
+                            stillColliding ? weakerMandate + " and " + otherMandate
+                                    + " still share a category frame after regeneration." : null));
         }
 
         BattleResult result = new BattleResult(positionsOf(runs), judgeResult, null);

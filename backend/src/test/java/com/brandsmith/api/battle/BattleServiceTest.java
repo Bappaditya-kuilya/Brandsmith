@@ -1,6 +1,7 @@
 package com.brandsmith.api.battle;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -207,6 +208,7 @@ class BattleServiceTest {
         assertEquals(1, result.judge().regenerated().size());
         assertEquals("contrarian", result.judge().regenerated().get(0).mandate());
         assertEquals("native", result.judge().regenerated().get(0).against());
+        assertTrue(result.judge().differenceCheck().ok());
         assertNull(BattleService.findCollision(result.positions()));
         Position contrarian = result.positions().stream()
                 .filter(p -> "contrarian".equals(p.mandate()))
@@ -237,6 +239,42 @@ class BattleServiceTest {
         }
         assertNull(result.selected());
         assertNull(BattleService.findCollision(positions));
+        assertNull(result.judge().differenceCheck());
+    }
+
+    @Test
+    void persistentFrameCollisionReportsFailedDifferenceCheck() throws Exception {
+        String sharedFrame = "the student productivity app category";
+        String sharedDifferentiator = "smart deadline reminders";
+        LlmClient llm = new LlmClient() {
+            @Override
+            public Response complete(Request request) {
+                String mandate = mandateOf(request.user());
+                if (mandate == null) {
+                    return llm(JUDGE_JSON, request.model());
+                }
+                if ("native".equals(mandate) || "contrarian".equals(mandate)) {
+                    return llm(positionJson(mandate, sharedFrame, sharedDifferentiator), request.model());
+                }
+                return llm(positionJson(mandate, "emotional frame", "emotional diff"), request.model());
+            }
+
+            @Override
+            public boolean available() {
+                return true;
+            }
+        };
+
+        BattleResult result = service(llm).run(sessionId, "tok", null, event -> {
+        });
+
+        JudgeResult.DifferenceCheck diff = result.judge().differenceCheck();
+        assertFalse(diff.ok());
+        assertTrue(diff.note().contains("contrarian"));
+        assertTrue(diff.note().contains("native"));
+        assertTrue(mapper.writeValueAsString(result.judge()).contains("differenceCheck"));
+        assertFalse(mapper.writeValueAsString(
+                new JudgeResult(result.judge().scores(), List.of())).contains("differenceCheck"));
     }
 
     @Test
