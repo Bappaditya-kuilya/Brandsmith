@@ -114,11 +114,15 @@ class BattleApiTest {
 
         JsonNode scores = body.at("/judge/scores");
         for (JsonNode score : scores) {
+            assertTrue(score.has("total"), "total missing from judge score JSON");
+            int sum = 0;
             for (String criterion : List.of("audienceFit", "distinctiveness", "credibility",
                     "memorability", "feasibility")) {
                 int value = score.get(criterion).asInt();
                 assertTrue(value >= 1 && value <= 5, criterion + " out of range: " + value);
+                sum += value;
             }
+            assertEquals(sum, score.get("total").asInt(), "total must equal the sum of the five criteria");
             assertTrue(score.get("explanation").asText().length() > 0);
         }
 
@@ -126,6 +130,7 @@ class BattleApiTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.brandDna.battle.positions.length()").value(3))
                 .andExpect(jsonPath("$.brandDna.battle.judge.scores.length()").value(3))
+                .andExpect(jsonPath("$.brandDna.battle.judge.scores[0].total").exists())
                 .andExpect(jsonPath("$.brandDna.battle.selected").value(org.hamcrest.Matchers.nullValue()));
 
         Integer runs = jdbc.queryForObject(

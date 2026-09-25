@@ -1,5 +1,7 @@
 package com.brandsmith.api.battle;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +15,7 @@ public record JudgeScore(@NotBlank String mandate,
                          @Min(1) @Max(5) int feasibility,
                          @NotBlank @Size(max = 500) String explanation) {
 
+    @JsonProperty("total")
     public int total() {
         return audienceFit + distinctiveness + credibility + memorability + feasibility;
     }
