@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ public class VisualService {
             "Choose a position before running visual direction. A chosen name is preferred.";
     public static final String NO_VISUAL_MESSAGE =
             "Run the visual stage before changing tokens.";
+    private static final String PROGRESS_MESSAGE = "Building palette and logo...";
 
     private static final Logger log = LoggerFactory.getLogger(VisualService.class);
     private static final SvgLogoRenderer RENDERER = new SvgLogoRenderer();
@@ -67,6 +69,11 @@ public class VisualService {
     }
 
     public VisualBoard run(UUID id, String token, String note) {
+        return run(id, token, note, event -> {
+        });
+    }
+
+    public VisualBoard run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPosition(dna)) {
@@ -81,7 +88,8 @@ public class VisualService {
         Map<String, Object> position = positionOf(dna);
         String brandName = brandName(dna);
 
-        Generation gen = generate(brief, position, brandName, note, snapshot.spentUsd(), snapshot.capUsd());
+        Generation gen = generate(brief, position, brandName, note, snapshot.spentUsd(),
+                snapshot.capUsd(), sink);
         VisualDirection direction = gen.direction();
         BrandVisual visual = build(direction, brandName, null);
         VisualBoard board = new VisualBoard(visual, direction);
@@ -150,7 +158,8 @@ public class VisualService {
     }
 
     private Generation generate(BriefState brief, Map<String, Object> position, String brandName, String note,
-                                double spentUsd, double capUsd) {
+                                double spentUsd, double capUsd, Consumer<SseEvent> sink) {
+        sink.accept(new SseEvent("progress", Map.of("stage", STAGE, "message", PROGRESS_MESSAGE)));
         if (!llm.available()) {
             return templateGeneration(brief, 0, "template", 0, 0);
         }
@@ -317,6 +326,9 @@ public class VisualService {
 
     public record VisualRunResult(VisualBoard board, long latencyMs, boolean degraded,
                                   String model, String promptVersion) {
+    }
+
+    public record SseEvent(String name, Object data) {
     }
 
     private record Generation(VisualDirection direction,

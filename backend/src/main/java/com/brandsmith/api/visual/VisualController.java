@@ -1,6 +1,5 @@
 package com.brandsmith.api.visual;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -11,36 +10,67 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.brandsmith.api.visual.VisualService.SseEvent;
 
 import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/sessions/{id}")
 public class VisualController {
 
+    private static final Logger log = LoggerFactory.getLogger(VisualController.class);
     private static final String COOKIE_NAME = "owner_token";
     private static final String STAGE = "visual";
+    private static final long SSE_TIMEOUT_MS = 120_000;
 
     private final VisualService service;
-    private final ObjectMapper mapper;
 
-    public VisualController(VisualService service, ObjectMapper mapper) {
+    public VisualController(VisualService service) {
         this.service = service;
-        this.mapper = mapper;
     }
 
-    @PostMapping(value = "/stages/visual/run",
-            produces = {MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<?> run(@PathVariable UUID id,
-                                 @CookieValue(name = COOKIE_NAME, required = false) String token,
-                                 @RequestHeader(value = "Accept", required = false) String accept) {
-        return respond(service.run(id, token, null), accept);
+    @PostMapping(value = "/stages/visual/run", headers = "Accept=application/json",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> run(@PathVariable UUID id,
+                                                   @CookieValue(name = COOKIE_NAME, required = false) String token) {
+        return ResponseEntity.ok(service.run(id, token, null).toMap());
+    }
+
+    @PostMapping(value = "/stages/visual/run", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter runStream(@PathVariable UUID id,
+                                @CookieValue(name = COOKIE_NAME, required = false) String token) {
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        Thread.startVirtualThread(() -> {
+            try {
+                send(emitter, new SseEvent("stage_started", Map.of("stage", STAGE)));
+                VisualBoard board = service.run(id, token, null, event -> send(emitter, event));
+                send(emitter, new SseEvent("stage_completed", Map.of(
+                        "stage", STAGE,
+                        "status", "ok",
+                        "data", board.toMap())));
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("Visual SSE run failed", e);
+                try {
+                    send(emitter, new SseEvent("error", Map.of("message", "Visual failed")));
+                } catch (RuntimeException ignored) {
+                    // client already disconnected
+                }
+                try {
+                    emitter.complete();
+                } catch (RuntimeException ignored) {
+                    // already completed
+                }
+            }
+        });
+        return emitter;
     }
 
     @PatchMapping(value = "/visual/tokens", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -53,34 +83,13 @@ public class VisualController {
         return service.patch(id, token, request).toMap();
     }
 
-    private ResponseEntity<?> respond(VisualBoard board, String accept) {
-        Map<String, Object> data = board.toMap();
-        if (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE)) {
-            return ResponseEntity.ok(data);
-        }
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(sse(data));
-    }
-
-    private String sse(Map<String, Object> data) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("event: stage_started\n");
-        sb.append("data: {\"stage\":\"").append(STAGE).append("\"}\n\n");
-        sb.append("event: progress\n");
-        sb.append("data: {\"stage\":\"").append(STAGE)
-                .append("\",\"message\":\"Building palette and logo...\"}\n\n");
-        sb.append("event: stage_completed\n");
-        sb.append("data: {\"stage\":\"").append(STAGE).append("\",\"status\":\"ok\",\"data\":")
-                .append(toJson(data)).append("}\n\n");
-        return sb.toString();
-    }
-
-    private String toJson(Object value) {
-        try {
-            return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize SSE payload", e);
+    private void send(SseEmitter emitter, SseEvent event) {
+        synchronized (emitter) {
+            try {
+                emitter.send(SseEmitter.event().name(event.name()).data(event.data()));
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
         }
     }
 }
