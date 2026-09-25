@@ -1,8 +1,15 @@
 // Browser e2e regression: home -> interview -> brief -> battle SSE -> export -> auth.
-// One-off setup (not a package.json dep, kept out of CI):
-//   npm i --no-save playwright && npx playwright install chromium
 // Run: node scripts/e2e-regress.mjs   (needs backend :8080 + vite :5173 up)
-import { chromium } from 'playwright'
+// Self-bootstraps playwright into root node_modules (gitignored) on first run.
+import { execSync } from 'node:child_process'
+
+let chromium
+try {
+  ;({ chromium } = await import('playwright'))
+} catch {
+  execSync('npm i --no-save playwright', { stdio: 'inherit' })
+  ;({ chromium } = await import('playwright'))
+}
 
 const BASE = 'http://localhost:5173'
 const IDEA =
@@ -20,7 +27,16 @@ function bad(name, detail) {
   results.push(`FAIL ${name} — ${detail}`)
 }
 
-const browser = await chromium.launch()
+let browser
+for (let attempt = 1; attempt <= 2; attempt++) {
+  try {
+    browser = await chromium.launch()
+    break
+  } catch (e) {
+    if (attempt === 2) throw e
+    execSync('npx playwright install chromium', { stdio: 'inherit' })
+  }
+}
 const ctx = await browser.newContext()
 const page = await ctx.newPage()
 page.on('pageerror', (e) => pageErrors.push(String(e)))
