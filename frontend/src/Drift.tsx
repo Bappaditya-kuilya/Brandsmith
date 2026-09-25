@@ -170,7 +170,10 @@ export function DriftPage({ onStatus }: DriftPageProps) {
           <textarea
             id="drift-text"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value)
+              setResult(null)
+            }}
             rows={8}
             maxLength={MAX_TEXT}
             placeholder="Paste a post, email or landing snippet to score…"
