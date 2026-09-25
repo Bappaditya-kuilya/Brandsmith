@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.brandsmith.api.budget.BudgetGuard;
@@ -68,13 +69,15 @@ public class VisualService {
         this.mainModel = mainModel;
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public VisualBoard run(UUID id, String token, String note) {
         return run(id, token, note, event -> {
         });
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public VisualBoard run(UUID id, String token, String note, Consumer<SseEvent> sink) {
-        SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
+        SessionService.StageSnapshot snapshot = sessions.loadStageForUpdate(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPosition(dna)) {
             throw new ResponseStatusException(CONFLICT, NO_POSITION_MESSAGE);
@@ -114,11 +117,12 @@ public class VisualService {
         return board;
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public VisualBoard patch(UUID id, String token, PatchTokensRequest request) {
         if (request == null) {
             throw new ResponseStatusException(BAD_REQUEST, "patch body required");
         }
-        SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
+        SessionService.StageSnapshot snapshot = sessions.loadStageForUpdate(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         Object existing = dna.get("visual");
         if (!(existing instanceof Map<?, ?> visualMap) || visualMap.isEmpty()) {

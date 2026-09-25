@@ -5,6 +5,9 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.doAnswer;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -13,8 +16,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +31,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockCookie;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import com.brandsmith.api.session.SessionService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -51,6 +61,9 @@ class LaunchApiTest {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @MockitoSpyBean
+    private SessionService sessions;
 
     private record Session(String id, MockCookie owner) {
     }
@@ -290,5 +303,33 @@ class LaunchApiTest {
                 "SELECT input::text FROM stage_run WHERE session_id = ? AND stage = 'S8'",
                 String.class, UUID.fromString(session.id()));
         assertTrue(input.contains("DeadlineDuo"), "stage_run input should include identity: " + input);
+    }
+
+    @Test
+    void brandDnaSaveRunsInTransactionHoldingRowLock() throws Exception {
+        Session session = createSession();
+        seedDna(session);
+        UUID id = UUID.fromString(session.id());
+        AtomicReference<String> sqlState = new AtomicReference<>();
+        doAnswer(inv -> {
+            assertTrue(TransactionSynchronizationManager.isActualTransactionActive(),
+                    "brand_dna save must run inside a transaction");
+            try (Connection conn = jdbc.getDataSource().getConnection();
+                 PreparedStatement ps = conn.prepareStatement(
+                         "SELECT id FROM session WHERE id = ? FOR UPDATE NOWAIT")) {
+                ps.setObject(1, id);
+                ps.executeQuery();
+            } catch (SQLException e) {
+                sqlState.set(e.getSQLState());
+            }
+            return inv.callRealMethod();
+        }).when(sessions).saveBrandDna(any(), any(), anyDouble());
+
+        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/launch/run")
+                        .cookie(session.owner())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        assertEquals("55P03", sqlState.get(), "session row should stay locked until the run commits");
     }
 }

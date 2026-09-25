@@ -109,6 +109,8 @@ class MessagesServiceTest {
         stageRun = new AtomicReference<>();
         when(sessions.loadStage(any(), any())).thenAnswer(inv ->
                 new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
+        when(sessions.loadStageForUpdate(any(), any())).thenAnswer(inv ->
+                new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
         when(sessions.loadBrandDna(any(), any())).thenAnswer(inv -> dnaStore.get());
         when(sessions.stageLocked(any(), any())).thenReturn(false);
         doAnswer(inv -> {

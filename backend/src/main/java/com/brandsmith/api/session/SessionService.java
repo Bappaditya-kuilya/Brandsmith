@@ -127,7 +127,14 @@ public class SessionService {
     }
 
     public StageSnapshot loadStage(UUID id, String token) {
-        Map<String, Object> row = fetchOwned(id, token);
+        return stageOf(fetchOwned(id, token));
+    }
+
+    public StageSnapshot loadStageForUpdate(UUID id, String token) {
+        return stageOf(fetchOwned(id, token, true));
+    }
+
+    private StageSnapshot stageOf(Map<String, Object> row) {
         return new StageSnapshot(readMap(row.get("brief_state")), readMap(row.get("brand_dna")),
                 ((Number) row.get("tokens_used")).doubleValue(),
                 ((Number) row.get("budget_cap")).doubleValue());
@@ -156,10 +163,15 @@ public class SessionService {
     }
 
     private Map<String, Object> fetchOwned(UUID id, String token) {
+        return fetchOwned(id, token, false);
+    }
+
+    private Map<String, Object> fetchOwned(UUID id, String token, boolean forUpdate) {
         List<Map<String, Object>> rows;
         try {
             rows = jdbc.queryForList(
-                    "SELECT * FROM session WHERE id = ? AND expires_at IS NOT NULL AND expires_at > now()", id);
+                    "SELECT * FROM session WHERE id = ? AND expires_at IS NOT NULL AND expires_at > now()"
+                            + (forUpdate ? " FOR UPDATE" : ""), id);
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(NOT_FOUND, "Session not found");
         }

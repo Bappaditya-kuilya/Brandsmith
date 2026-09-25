@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.brandsmith.api.budget.BudgetGuard;
@@ -109,13 +110,15 @@ public class NamingService {
         this.smallModel = smallModel;
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public RunResult run(UUID id, String token, String note) {
         return run(id, token, note, event -> {
         });
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
-        SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
+        SessionService.StageSnapshot snapshot = sessions.loadStageForUpdate(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPersonality(dna)) {
             throw new ResponseStatusException(CONFLICT, NO_PERSONALITY_MESSAGE);
@@ -159,12 +162,13 @@ public class NamingService {
         return new RunResult(output, gen.latencyMs(), gen.degraded(), gen.model(), gen.promptVersion());
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public Map<String, Object> select(UUID id, String token, SelectRequest request) {
         if (request == null || (request.nameIndex() == null
                 && (request.name() == null || request.name().isBlank()))) {
             throw new ResponseStatusException(BAD_REQUEST, "nameIndex or name is required");
         }
-        Map<String, Object> dna = sessions.loadBrandDna(id, token);
+        Map<String, Object> dna = sessions.loadStageForUpdate(id, token).brandDna();
         List<Object> names = namingNames(dna);
         if (names == null || names.isEmpty()) {
             throw new ResponseStatusException(CONFLICT, NO_NAMES_MESSAGE);

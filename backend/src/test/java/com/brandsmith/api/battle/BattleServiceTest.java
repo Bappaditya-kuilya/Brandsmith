@@ -93,6 +93,8 @@ class BattleServiceTest {
         dnaStore = new AtomicReference<>(new java.util.LinkedHashMap<>());
         when(sessions.loadStage(any(), any()))
                 .thenAnswer(inv -> new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
+        when(sessions.loadStageForUpdate(any(), any()))
+                .thenAnswer(inv -> new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
         when(sessions.loadBrandDna(any(), any())).thenAnswer(inv -> dnaStore.get());
         doAnswer(inv -> {
             dnaStore.set(inv.getArgument(1));

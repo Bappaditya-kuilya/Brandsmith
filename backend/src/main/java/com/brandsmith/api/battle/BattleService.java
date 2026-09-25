@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.brandsmith.api.battle.JudgeResult.DifferenceCheck;
@@ -97,6 +98,7 @@ public class BattleService {
         ready(id, token, note);
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public BattleResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         Ready ready = ready(id, token, note);
         BriefState brief = ready.brief();
@@ -154,7 +156,7 @@ public class BattleService {
         }
 
         BattleResult result = new BattleResult(positionsOf(runs), judgeResult, null);
-        persist(id, ready.snapshot().brandDna(), result, cost);
+        persist(id, token, result, cost);
         sink.accept(new SseEvent("stage_completed", result));
         return result;
     }
@@ -179,11 +181,12 @@ public class BattleService {
     private record Ready(SessionService.StageSnapshot snapshot, BriefState brief) {
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public Map<String, Object> select(UUID id, String token, SelectRequest request) {
         if (request == null || request.index() == null || request.index() < 0 || request.index() > 2) {
             throw new ResponseStatusException(BAD_REQUEST, "index must be 0, 1 or 2");
         }
-        Map<String, Object> dna = sessions.loadBrandDna(id, token);
+        Map<String, Object> dna = sessions.loadStageForUpdate(id, token).brandDna();
         Map<String, Object> battle = battleOf(dna);
         List<Object> positions = battle == null ? null : listOf(battle.get("positions"));
         if (positions == null || positions.isEmpty()) {
@@ -492,8 +495,8 @@ public class BattleService {
         return 0;
     }
 
-    private void persist(UUID id, Map<String, Object> currentDna, BattleResult result, double costUsd) {
-        Map<String, Object> dna = new LinkedHashMap<>(currentDna);
+    private void persist(UUID id, String token, BattleResult result, double costUsd) {
+        Map<String, Object> dna = new LinkedHashMap<>(sessions.loadStageForUpdate(id, token).brandDna());
         Map<String, Object> battle = new LinkedHashMap<>();
         battle.put("positions", result.positions());
         battle.put("judge", result.judge());

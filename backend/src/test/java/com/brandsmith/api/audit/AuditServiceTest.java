@@ -103,6 +103,8 @@ class AuditServiceTest {
                 MAP_TYPE));
         when(sessions.loadStage(any(), any())).thenAnswer(inv ->
                 new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
+        when(sessions.loadStageForUpdate(any(), any())).thenAnswer(inv ->
+                new SessionService.StageSnapshot(briefStore.get(), dnaStore.get(), 0.0, 0.40));
         when(sessions.stageLocked(any(), any())).thenReturn(false);
         when(recorder.start(any(), any(), any())).thenAnswer(inv ->
                 new StageRunRecorder.Run(UUID.randomUUID(), inv.getArgument(0), inv.getArgument(1)));

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.brandsmith.api.budget.BudgetGuard;
@@ -73,13 +74,15 @@ public class PersonalityService {
         this.mainModel = mainModel;
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public RunResult run(UUID id, String token, String note) {
         return run(id, token, note, event -> {
         });
     }
 
+    @Transactional(noRollbackFor = RuntimeException.class)
     public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
-        SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
+        SessionService.StageSnapshot snapshot = sessions.loadStageForUpdate(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPosition(dna)) {
             throw new ResponseStatusException(CONFLICT, NO_POSITION_MESSAGE);
