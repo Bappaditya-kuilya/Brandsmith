@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ public class PersonalityService {
             "Choose a position before running personality.";
     public static final String LOCKED_MESSAGE =
             "Personality is locked. Unlock it before regenerating.";
+    private static final String PROGRESS_MESSAGE = "Generating traits and voice spec...";
 
     private static final Logger log = LoggerFactory.getLogger(PersonalityService.class);
     private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {
@@ -72,6 +74,11 @@ public class PersonalityService {
     }
 
     public RunResult run(UUID id, String token, String note) {
+        return run(id, token, note, event -> {
+        });
+    }
+
+    public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPosition(dna)) {
@@ -88,7 +95,7 @@ public class PersonalityService {
                 ? (Map<String, Object>) dna.get("position")
                 : Map.of();
 
-        Generation gen = generate(brief, position, note, snapshot.spentUsd(), snapshot.capUsd());
+        Generation gen = generate(brief, position, note, snapshot.spentUsd(), snapshot.capUsd(), sink);
         PersonalityOutput output = gen.output();
         validate(output);
 
@@ -113,7 +120,8 @@ public class PersonalityService {
     }
 
     private Generation generate(BriefState brief, Map<String, Object> position, String note,
-                                double spentUsd, double capUsd) {
+                                double spentUsd, double capUsd, Consumer<SseEvent> sink) {
+        sink.accept(new SseEvent("progress", Map.of("stage", STAGE, "message", PROGRESS_MESSAGE)));
         if (!llm.available()) {
             return templateGeneration(brief);
         }
@@ -246,6 +254,9 @@ public class PersonalityService {
                             boolean degraded,
                             String model,
                             String promptVersion) {
+    }
+
+    public record SseEvent(String name, Object data) {
     }
 
     private record Generation(PersonalityOutput output,

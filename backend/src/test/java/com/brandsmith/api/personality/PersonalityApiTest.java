@@ -1,13 +1,11 @@
 package com.brandsmith.api.personality;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -137,16 +135,34 @@ class PersonalityApiTest {
         Session session = createSession();
         selectPosition(session);
 
-        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/personality/run")
+        MvcResult mvc = mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/personality/run")
                         .cookie(session.owner())
                         .accept(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(content().string(containsString("event: stage_started")))
-                .andExpect(content().string(containsString("\"stage\":\"personality\"")))
-                .andExpect(content().string(containsString("event: stage_completed")))
-                .andExpect(content().string(containsString("\"traits\""))
-                );
+                .andReturn();
+
+        String body = "";
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline) {
+            body = mvc.getResponse().getContentAsString();
+            if (body.contains("stage_completed")) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertTrue(body.contains("event:stage_started"), "missing stage_started: " + body);
+        assertTrue(body.contains("\"stage\":\"personality\""), "missing personality stage: " + body);
+        assertTrue(body.contains("event:progress"), "missing progress: " + body);
+        assertTrue(body.contains("event:stage_completed"), "missing stage_completed: " + body);
+        assertTrue(body.contains("\"traits\""), "stage_completed missing traits: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
+
+        if (mvc.getRequest().isAsyncStarted()) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .asyncDispatch(mvc)).andReturn();
+        }
     }
 
     @Test
