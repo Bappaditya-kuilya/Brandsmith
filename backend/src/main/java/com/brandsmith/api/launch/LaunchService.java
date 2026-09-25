@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,11 @@ public class LaunchService {
     }
 
     public RunResult run(UUID id, String token, String note) {
+        return run(id, token, note, event -> {
+        });
+    }
+
+    public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!present(dna.get("position")) || !present(dna.get("identity"))) {
@@ -68,7 +74,7 @@ public class LaunchService {
             throw new ResponseStatusException(CONFLICT, LOCKED_MESSAGE);
         }
 
-        Generation gen = generate(dna, note, snapshot.spentUsd(), snapshot.capUsd());
+        Generation gen = generate(dna, note, snapshot.spentUsd(), snapshot.capUsd(), sink);
         LaunchOutput output = gen.output();
 
         Map<String, Object> nextDna = new LinkedHashMap<>(dna);
@@ -89,7 +95,10 @@ public class LaunchService {
     }
 
     private Generation generate(Map<String, Object> dna, String note,
-                                double spentUsd, double capUsd) {
+                                double spentUsd, double capUsd, Consumer<SseEvent> sink) {
+        sink.accept(new SseEvent("progress", Map.of(
+                "stage", "launch",
+                "message", "Writing hero, pitch, posts and bio...")));
         if (!llm.available()) {
             return templateGeneration();
         }
@@ -176,5 +185,8 @@ public class LaunchService {
                               int tokensOut,
                               long latencyMs,
                               double costUsd) {
+    }
+
+    public record SseEvent(String name, Object data) {
     }
 }

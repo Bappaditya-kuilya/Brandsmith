@@ -142,15 +142,33 @@ class LaunchApiTest {
         Session session = createSession();
         seedDna(session);
 
-        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/launch/run")
+        MvcResult mvc = mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/launch/run")
                         .cookie(session.owner())
                         .accept(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(content().string(containsString("event: stage_started")))
-                .andExpect(content().string(containsString("\"stage\":\"launch\"")))
-                .andExpect(content().string(containsString("event: stage_completed")))
-                .andExpect(content().string(containsString("\"posts\"")));
+                .andReturn();
+
+        String body = "";
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline) {
+            body = mvc.getResponse().getContentAsString();
+            if (body.contains("stage_completed")) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertTrue(body.contains("stage_started"), "missing stage_started: " + body);
+        assertTrue(body.contains("progress"), "missing progress: " + body);
+        assertTrue(body.contains("stage_completed"), "missing stage_completed: " + body);
+        assertTrue(body.contains("\"posts\""), "stage_completed missing posts: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
+
+        if (mvc.getRequest().isAsyncStarted()) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .asyncDispatch(mvc)).andReturn();
+        }
     }
 
     @Test

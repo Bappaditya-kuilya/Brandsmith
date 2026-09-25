@@ -5,8 +5,8 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -143,16 +143,35 @@ class AuditApiTest {
         Session session = createSession();
         seedDna(session);
 
-        mockMvc.perform(post("/api/sessions/" + session.id() + "/audit")
+        MvcResult mvc = mockMvc.perform(post("/api/sessions/" + session.id() + "/audit")
                         .cookie(session.owner())
                         .accept(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(content().string(containsString("event: stage_started")))
-                .andExpect(content().string(containsString("\"stage\":\"S7\"")))
-                .andExpect(content().string(containsString("event: progress")))
-                .andExpect(content().string(containsString("event: stage_completed")))
-                .andExpect(content().string(containsString("voiceCompliance")));
+                .andReturn();
+
+        String body = "";
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline) {
+            body = mvc.getResponse().getContentAsString();
+            if (body.contains("stage_completed")) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertTrue(body.contains("stage_started"), "missing stage_started: " + body);
+        assertTrue(body.contains("progress"), "missing progress: " + body);
+        assertTrue(body.contains("stage_completed"), "missing stage_completed: " + body);
+        assertTrue(body.contains("\"stage\":\"S7\""), "missing stage S7: " + body);
+        assertTrue(body.contains("voiceCompliance"),
+                "stage_completed missing audit data: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
+
+        if (mvc.getRequest().isAsyncStarted()) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .asyncDispatch(mvc)).andReturn();
+        }
     }
 
     @Test
