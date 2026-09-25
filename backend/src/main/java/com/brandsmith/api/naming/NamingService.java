@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +110,11 @@ public class NamingService {
     }
 
     public RunResult run(UUID id, String token, String note) {
+        return run(id, token, note, event -> {
+        });
+    }
+
+    public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         if (!hasPersonality(dna)) {
@@ -129,7 +135,8 @@ public class NamingService {
                 ? (Map<String, Object>) dna.get("personality")
                 : Map.of();
 
-        Generation gen = generate(brief, position, personality, note, snapshot.spentUsd(), snapshot.capUsd());
+        Generation gen = generate(brief, position, personality, note, snapshot.spentUsd(),
+                snapshot.capUsd(), sink);
         NamingOutput output = gen.output();
         validate(output);
 
@@ -204,7 +211,8 @@ public class NamingService {
 
     private Generation generate(BriefState brief, Map<String, Object> position,
                                 Map<String, Object> personality, String note,
-                                double spentUsd, double capUsd) {
+                                double spentUsd, double capUsd, Consumer<SseEvent> sink) {
+        sink.accept(new SseEvent("progress", Map.of("message", "Generating name candidates…")));
         if (!llm.available()) {
             return templateGeneration(brief, position, personality);
         }
@@ -224,6 +232,8 @@ public class NamingService {
                 scoreLocalOnly(prepared);
             } else {
                 prepared = fromRaw(result.value());
+                sink.accept(new SseEvent("progress",
+                        Map.of("message", "Scoring 9 names against the anti-generic engine...")));
                 for (ScoredWork work : prepared.works()) {
                     scoreWithCritic(work, spentUsd, capUsd, cost);
                 }
@@ -636,6 +646,9 @@ public class NamingService {
                             boolean degraded,
                             String model,
                             String promptVersion) {
+    }
+
+    public record SseEvent(String name, Object data) {
     }
 
     private record Generation(NamingOutput output,

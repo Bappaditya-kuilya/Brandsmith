@@ -1,12 +1,10 @@
 package com.brandsmith.api.messages;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -109,15 +107,34 @@ class MessagesApiTest {
         Session session = createSession();
         seedName(session);
 
-        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/messages/run")
+        MvcResult mvc = mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/messages/run")
                         .cookie(session.owner())
                         .accept(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(content().string(containsString("event: stage_started")))
-                .andExpect(content().string(containsString("\"stage\":\"messages\"")))
-                .andExpect(content().string(containsString("event: stage_completed")))
-                .andExpect(content().string(containsString("\"taglines\"")));
+                .andReturn();
+
+        String body = "";
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline) {
+            body = mvc.getResponse().getContentAsString();
+            if (body.contains("stage_completed")) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertTrue(body.contains("stage_started"), "missing stage_started: " + body);
+        assertTrue(body.contains("progress"), "missing progress: " + body);
+        assertTrue(body.contains("stage_completed"), "missing stage_completed: " + body);
+        assertTrue(body.contains("\"taglines\""), "stage_completed missing taglines: " + body);
+        assertTrue(body.contains("\"stage\":\"messages\""), "missing messages stage: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
+
+        if (mvc.getRequest().isAsyncStarted()) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .asyncDispatch(mvc)).andReturn();
+        }
     }
 
     @Test
@@ -156,7 +173,8 @@ class MessagesApiTest {
         mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/messages/select")
                         .cookie(session.owner())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"index\":0}"))
+                        .content("{\"index\":0}")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value(MessagesService.NO_MESSAGES_MESSAGE));
     }

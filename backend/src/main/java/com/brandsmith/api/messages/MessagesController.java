@@ -3,19 +3,20 @@ package com.brandsmith.api.messages;
 import java.util.Map;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.brandsmith.api.messages.MessagesService.RunResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.brandsmith.api.messages.MessagesService.SseEvent;
 
 import jakarta.validation.Valid;
 
@@ -23,31 +24,43 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/sessions/{id}/stages/messages")
 public class MessagesController {
 
+    private static final Logger log = LoggerFactory.getLogger(MessagesController.class);
     private static final String COOKIE_NAME = "owner_token";
     private static final String STAGE = "messages";
+    private static final long SSE_TIMEOUT_MS = 120_000;
 
     private final MessagesService service;
-    private final ObjectMapper mapper;
 
-    public MessagesController(MessagesService service, ObjectMapper mapper) {
+    public MessagesController(MessagesService service) {
         this.service = service;
-        this.mapper = mapper;
     }
 
-    @PostMapping(value = "/run", produces = {MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/run", headers = "Accept=application/json",
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> run(@PathVariable UUID id,
-                                 @CookieValue(name = COOKIE_NAME, required = false) String token,
-                                 @RequestHeader(value = "Accept", required = false) String accept) {
-        return respond(service.run(id, token, null), accept);
+                                 @CookieValue(name = COOKIE_NAME, required = false) String token) {
+        return ResponseEntity.ok(service.run(id, token, null).output());
     }
 
-    @PostMapping(value = "/regenerate", produces = {MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    @PostMapping(value = "/run", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter runStream(@PathVariable UUID id,
+                                @CookieValue(name = COOKIE_NAME, required = false) String token) {
+        return stream(id, token, null);
+    }
+
+    @PostMapping(value = "/regenerate", headers = "Accept=application/json",
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> regenerate(@PathVariable UUID id,
                                         @CookieValue(name = COOKIE_NAME, required = false) String token,
-                                        @RequestHeader(value = "Accept", required = false) String accept,
                                         @Valid @RequestBody(required = false) RegenerateRequest request) {
-        String note = request == null ? null : request.note();
-        return respond(service.run(id, token, note), accept);
+        return ResponseEntity.ok(service.run(id, token, note(request)).output());
+    }
+
+    @PostMapping(value = "/regenerate", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter regenerateStream(@PathVariable UUID id,
+                                       @CookieValue(name = COOKIE_NAME, required = false) String token,
+                                       @Valid @RequestBody(required = false) RegenerateRequest request) {
+        return stream(id, token, note(request));
     }
 
     @PostMapping("/select")
@@ -57,37 +70,48 @@ public class MessagesController {
         return service.select(id, token, request);
     }
 
-    private ResponseEntity<?> respond(RunResult result, String accept) {
-        if (accept != null && accept.contains(MediaType.APPLICATION_JSON_VALUE)) {
-            return ResponseEntity.ok(result.output());
-        }
-        return ResponseEntity.ok()
-                .contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(sse(result));
+    private static String note(RegenerateRequest request) {
+        return request == null ? null : request.note();
     }
 
-    private String sse(RunResult result) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("event: stage_started\n");
-        sb.append("data: {\"stage\":\"").append(STAGE).append("\"}\n\n");
-        sb.append("event: progress\n");
-        sb.append("data: {\"stage\":\"").append(STAGE)
-                .append("\",\"message\":\"Scoring taglines and building hierarchy...\"}\n\n");
-        Map<String, Object> completed = Map.of(
-                "stage", STAGE,
-                "status", result.degraded() ? "degraded" : "ok",
-                "latencyMs", result.latencyMs(),
-                "data", result.output());
-        sb.append("event: stage_completed\n");
-        sb.append("data: ").append(toJson(completed)).append("\n\n");
-        return sb.toString();
+    private SseEmitter stream(UUID id, String token, String note) {
+        SseEmitter emitter = new SseEmitter(SSE_TIMEOUT_MS);
+        Thread.startVirtualThread(() -> {
+            try {
+                send(emitter, new SseEvent("stage_started", Map.of("stage", STAGE)));
+                RunResult result = service.run(id, token, note, event -> send(emitter, event));
+                send(emitter, new SseEvent("stage_completed", Map.of(
+                        "stage", STAGE,
+                        "status", result.degraded() ? "degraded" : "ok",
+                        "latencyMs", result.latencyMs(),
+                        "data", result.output())));
+                emitter.complete();
+            } catch (Exception e) {
+                log.error("Messages SSE run failed", e);
+                try {
+                    send(emitter, new SseEvent("error", Map.of(
+                            "stage", STAGE,
+                            "message", "Messages failed")));
+                } catch (RuntimeException ignored) {
+                    // client already disconnected
+                }
+                try {
+                    emitter.complete();
+                } catch (RuntimeException ignored) {
+                    // already completed
+                }
+            }
+        });
+        return emitter;
     }
 
-    private String toJson(Object value) {
-        try {
-            return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Failed to serialize SSE payload", e);
+    private void send(SseEmitter emitter, SseEvent event) {
+        synchronized (emitter) {
+            try {
+                emitter.send(SseEmitter.event().name(event.name()).data(event.data()));
+            } catch (java.io.IOException e) {
+                throw new java.io.UncheckedIOException(e);
+            }
         }
     }
 }

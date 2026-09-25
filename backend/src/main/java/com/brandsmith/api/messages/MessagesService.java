@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +97,11 @@ public class MessagesService {
     }
 
     public RunResult run(UUID id, String token, String note) {
+        return run(id, token, note, event -> {
+        });
+    }
+
+    public RunResult run(UUID id, String token, String note, Consumer<SseEvent> sink) {
         SessionService.StageSnapshot snapshot = sessions.loadStage(id, token);
         Map<String, Object> dna = snapshot.brandDna();
         String name = selectedName(dna);
@@ -112,7 +118,7 @@ public class MessagesService {
         BriefState brief = mapper.convertValue(snapshot.brief(), BriefState.class);
         brief.ensureFields();
 
-        Generation gen = generate(brief, dna, name, note, snapshot.spentUsd(), snapshot.capUsd());
+        Generation gen = generate(brief, dna, name, note, snapshot.spentUsd(), snapshot.capUsd(), sink);
         MessagesOutput output = gen.output();
         validate(output);
 
@@ -177,7 +183,9 @@ public class MessagesService {
     }
 
     private Generation generate(BriefState brief, Map<String, Object> dna, String name, String note,
-                                double spentUsd, double capUsd) {
+                                double spentUsd, double capUsd, Consumer<SseEvent> sink) {
+        sink.accept(new SseEvent("progress",
+                Map.of("message", "Scoring taglines and building hierarchy...")));
         if (!llm.available()) {
             return templateGeneration(brief, name);
         }
@@ -528,6 +536,9 @@ public class MessagesService {
                             boolean degraded,
                             String model,
                             String promptVersion) {
+    }
+
+    public record SseEvent(String name, Object data) {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

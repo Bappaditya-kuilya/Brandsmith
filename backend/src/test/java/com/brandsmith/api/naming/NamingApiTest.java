@@ -1,11 +1,9 @@
 package com.brandsmith.api.naming;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -133,15 +131,34 @@ class NamingApiTest {
         Session session = createSession();
         withPersonality(session);
 
-        mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/naming/run")
+        MvcResult mvc = mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/naming/run")
                         .cookie(session.owner())
                         .accept(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM))
-                .andExpect(content().string(containsString("event: stage_started")))
-                .andExpect(content().string(containsString("\"stage\":\"naming\"")))
-                .andExpect(content().string(containsString("event: stage_completed")))
-                .andExpect(content().string(containsString("\"names\"")));
+                .andReturn();
+
+        String body = "";
+        long deadline = System.currentTimeMillis() + 5000;
+        while (System.currentTimeMillis() < deadline) {
+            body = mvc.getResponse().getContentAsString();
+            if (body.contains("stage_completed")) {
+                break;
+            }
+            Thread.sleep(50);
+        }
+        assertTrue(body.contains("stage_started"), "missing stage_started: " + body);
+        assertTrue(body.contains("progress"), "missing progress: " + body);
+        assertTrue(body.contains("stage_completed"), "missing stage_completed: " + body);
+        assertTrue(body.contains("\"names\""), "stage_completed missing names: " + body);
+        assertTrue(body.contains("\"stage\":\"naming\""), "missing naming stage: " + body);
+
+        String contentType = mvc.getResponse().getContentType();
+        assertTrue(contentType != null && contentType.contains("text/event-stream"),
+                "content type: " + contentType);
+
+        if (mvc.getRequest().isAsyncStarted()) {
+            mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                    .asyncDispatch(mvc)).andReturn();
+        }
     }
 
     @Test
@@ -160,7 +177,8 @@ class NamingApiTest {
         mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/naming/select")
                         .cookie(session.owner())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nameIndex\":2}"))
+                        .content("{\"nameIndex\":2}")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(chosen))
                 .andExpect(jsonPath("$.nameIndex").value(2));
@@ -172,7 +190,8 @@ class NamingApiTest {
         mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/naming/select")
                         .cookie(session.owner())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"" + chosen + "\"}"))
+                        .content("{\"name\":\"" + chosen + "\"}")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(chosen));
     }
@@ -185,7 +204,8 @@ class NamingApiTest {
         mockMvc.perform(post("/api/sessions/" + session.id() + "/stages/naming/select")
                         .cookie(session.owner())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"nameIndex\":0}"))
+                        .content("{\"nameIndex\":0}")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value(NamingService.NO_NAMES_MESSAGE));
     }
